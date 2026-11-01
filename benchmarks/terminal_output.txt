@@ -1,0 +1,15 @@
+==============================================================================
+THE OUTSIDE JUDGE — ML from First Principles in JAX Verification Report
+==============================================================================
+Runtime : Python 3.12.11 | JAX 0.12.0.1 | NumPy 2.5.4 | Backend: cpu
+------------------------------------------------------------------------------
+Experiment                         | Baseline / Naive | Learned / JAX ML | Gain / Check
+------------------------------------------------------------------------------
+01. Rules vs Learned Linear MSE    | 531.3102 MSE     | 0.3949 MSE       | 1345.28x lower
+02. SGD vs Momentum vs Adam        | SGD 180 steps    | Adam 79 steps    | 761.17x @jit
+03. LogSumExp & Cross-Entropy      | 33.33% (NaN exp) | 99.94% (Finite)  | PASS (<1e-7)
+04. 2-Layer MLP vs Linear Stack    | 32.53% (Linear)  | 99.47% (GELU MLP) | PASS (>97%) 
+05. Overfitting vs Weight Decay    | 9.9728 Val MSE   | 2.2289 Val MSE   | 4.47x lower 
+------------------------------------------------------------------------------
+Saved JSON report to: benchmarks/latest_results.json
+ALL DETERMINISTIC CHECKS PASSED.

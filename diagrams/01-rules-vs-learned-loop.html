@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hardcoded Software Rules vs Learned ML Weights Loop · Architecture delta</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper: #F7F6F2;
+      --color-paper-2: #EFECE6;
+      --color-ink: #0F2547;
+      --color-muted: #3B5B8C;
+      --color-rule: rgba(15,37,71,0.14);
+      --color-accent: #C59216;
+      --color-accent-text: #9A6F0B;
+      --font-sans: 'Geist', system-ui, sans-serif;
+      --font-serif: 'Instrument Serif', serif;
+      --font-mono: 'Geist Mono', ui-monospace, monospace;
+    }
+    body { font-family: var(--font-sans); color: var(--color-ink); background: var(--color-paper); min-height: 100vh; padding: 2.5rem 2rem; display: flex; align-items: center; justify-content: center; }
+    .frame { width: 100%; max-width: 1200px; min-width: 0; margin: 0 auto; }
+    .eyebrow { font-family: var(--font-mono); font-size: 0.66rem; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; color: var(--color-muted); margin-bottom: 0.5rem; }
+    h1 { font-family: var(--font-serif); font-size: clamp(1.75rem, 3vw + 1rem, 2rem); line-height: 1.1; font-weight: 400; letter-spacing: -0.02em; margin-bottom: 1.5rem; }
+    .diagram-container { width: 100%; overflow-x: auto; }
+    .diagram-container:focus-visible { outline: 2px solid var(--color-muted); outline-offset: 4px; }
+    svg { display: block; width: 100%; min-width: 1200px; }
+    .scroll-hint { display: none; margin: 1rem 0 0; font-size: 0.8125rem; color: var(--color-muted); }
+    @media (max-width: 700px) { body { padding: 1.5rem 1rem; } .scroll-hint { display: block; } }
+    @media print { .diagram-container { overflow-x: visible; } svg { min-width: 0; } }
+  </style>
+</head>
+<body>
+  <main class="frame">
+    <p class="eyebrow">Architecture delta · JAX &amp; OpenXLA Field Guide</p>
+    <h1>From hardcoded if/else heuristics to learned weights via jax.value_and_grad</h1>
+
+    <div class="diagram-container" role="region" aria-label="Before, changes, and after architecture comparison; scroll horizontally on narrow screens" tabindex="0">
+      <svg viewBox="0 0 1200 660" xmlns="http://www.w3.org/2000/svg" data-diagram="architecture-delta" role="img" aria-labelledby="rules-vs-ml-title rules-vs-ml-desc">
+        <title id="rules-vs-ml-title">Hardcoded software rules vs learned Machine Learning weights in JAX</title>
+        <desc id="rules-vs-ml-desc">Architecture delta comparing traditional software heuristics with brittle if/else thresholds against a Machine Learning training loop that optimizes linear weights w and b with MSE loss and jax.value_and_grad.</desc>
+        <defs>
+          <marker id="rules-vs-ml-arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto" markerUnits="userSpaceOnUse"><polygon points="0 0, 8 3, 0 6" fill="#3B5B8C"/></marker>
+        </defs>
+        <rect width="1200" height="660" fill="#F7F6F2"/>
+        <text x="24" y="28" fill="#0F2547" font-size="14" font-family="'Geist', sans-serif" font-weight="600">Before · Hardcoded Software Rules</text>
+        <text x="24" y="50" fill="#3B5B8C" font-size="10" font-family="'Geist', sans-serif">Rules + Data → Prediction (MSE = 531.31)</text>
+        <text x="424" y="28" fill="#0F2547" font-size="14" font-family="'Geist', sans-serif" font-weight="600">Changes Ledger</text>
+        <text x="424" y="50" fill="#3B5B8C" font-size="10" font-family="'Geist', sans-serif">Shift from manual magic numbers to automatic gradient descent</text>
+        <text x="840" y="28" fill="#0F2547" font-size="14" font-family="'Geist', sans-serif" font-weight="600">After · Learned ML Loop in JAX</text>
+        <text x="840" y="50" fill="#3B5B8C" font-size="10" font-family="'Geist', sans-serif">Data + Targets → value_and_grad → Weights (MSE = 0.39)</text>
+        <path d="M 392 8 V 568 M 808 8 V 568" stroke="rgba(15,37,71,0.14)" stroke-width="1"/>
+
+        <g data-snapshot="before" transform="translate(24 88)" data-grid="336 480 4">
+          <path data-kind="relationship" data-object-id="r1" data-status="unchanged" data-signature="telemetry:in" data-from="telemetry" data-to="predictor" d="M 168 64 V 96" fill="none" stroke="#3B5B8C" stroke-width="1.2" marker-end="url(#rules-vs-ml-arrow)"/>
+          <path data-kind="relationship" data-object-id="r2" data-status="rewired" data-signature="eval-output" data-from="predictor" data-to="ifelse" d="M 168 160 V 192" fill="none" stroke="#3B5B8C" stroke-width="1.2" stroke-dasharray="8 3 2 3" marker-end="url(#rules-vs-ml-arrow)"/>
+          <path data-kind="relationship" data-object-id="r3" data-status="removed" data-signature="manual-oncall-edit" data-from="ifelse" data-to="tuning" d="M 168 256 V 304" fill="none" stroke="#3B5B8C" stroke-width="1.2" stroke-dasharray="4 4" marker-end="url(#rules-vs-ml-arrow)"/>
+          <path data-kind="relationship" data-object-id="r5" data-status="unchanged" data-signature="emit-latency" data-from="tuning" data-to="estimate" d="M 168 368 V 416" fill="none" stroke="#3B5B8C" stroke-width="1.2" marker-end="url(#rules-vs-ml-arrow)"/>
+
+          <rect x="176" y="72" width="96" height="16" rx="2" fill="#F7F6F2"/>
+          <text x="180" y="84" fill="#3B5B8C" font-size="8" font-family="'Geist Mono', monospace">r1 · INPUT</text>
+          <rect x="176" y="168" width="96" height="16" rx="2" fill="#F7F6F2"/>
+          <text x="180" y="180" fill="#3B5B8C" font-size="8" font-family="'Geist Mono', monospace">r2 · REWIRED</text>
+          <rect x="176" y="272" width="108" height="16" rx="2" fill="#F7F6F2"/>
+          <text x="180" y="284" fill="#3B5B8C" font-size="8" font-family="'Geist Mono', monospace">r3 · MANUAL PR</text>
+          <rect x="176" y="384" width="96" height="16" rx="2" fill="#F7F6F2"/>
+          <text x="180" y="396" fill="#3B5B8C" font-size="8" font-family="'Geist Mono', monospace">r5 · OUTPUT</text>
+
+          <g data-kind="component" data-object-id="telemetry" data-status="unchanged" data-signature="data:telemetry:v1">
+            <rect data-role="bounds" x="84" y="0" width="168" height="64" rx="6" fill="#EFECE6" stroke="#3B5B8C" stroke-width="1.2"/>
+            <text x="96" y="16" fill="#3B5B8C" font-size="7.5" font-family="'Geist Mono', monospace">= telemetry · UNCHANGED</text>
+            <text x="96" y="36" fill="#0F2547" font-size="12" font-family="'Geist', sans-serif" font-weight="600">Server Telemetry</text>
+            <text x="96" y="52" fill="#3B5B8C" font-size="9" font-family="'Geist Mono', monospace">X[2048, 4] float32</text>
+          </g>
+
+          <g data-kind="component" data-object-id="predictor" data-status="changed" data-signature="fn:hardcoded:v1">
+            <rect data-role="bounds" x="84" y="96" width="168" height="64" rx="6" fill="rgba(197,146,22,0.12)" stroke="#C59216" stroke-width="1.4"/>
+            <path d="M 85 108 V 148" fill="none" stroke="#C59216" stroke-width="3"/>
+            <text x="96" y="112" fill="#9A6F0B" font-size="7.5" font-family="'Geist Mono', monospace">~ predictor · CHANGED</text>
+            <text x="96" y="132" fill="#0F2547" font-size="12" font-family="'Geist', sans-serif" font-weight="600">Static Multipliers</text>
+            <text x="96" y="148" fill="#9A6F0B" font-size="9" font-family="'Geist Mono', monospace">18*cpu + 6*rps + ...</text>
+          </g>
+
+          <g data-kind="component" data-object-id="ifelse" data-status="removed" data-signature="rules:thresholds:v1">
+            <rect data-role="bounds" x="84" y="192" width="168" height="64" rx="6" fill="#EFECE6" stroke="#3B5B8C" stroke-width="1.2" stroke-dasharray="4 4"/>
+            <text x="96" y="208" fill="#3B5B8C" font-size="7.5" font-family="'Geist Mono', monospace">− ifelse · REMOVED</text>
+            <text x="96" y="228" fill="#0F2547" font-size="12" font-family="'Geist', sans-serif" font-weight="600">if/else Thresholds</text>
+            <text x="96" y="244" fill="#3B5B8C" font-size="9" font-family="'Geist Mono', monospace">cpu &gt; 0.75 ? +14ms</text>
+          </g>
+
+          <g data-kind="component" data-object-id="tuning" data-status="changed" data-signature="update:human-oncall">
+            <rect data-role="bounds" x="84" y="304" width="168" height="64" rx="6" fill="#EFECE6" stroke="#3B5B8C" stroke-width="1.2"/>
+            <path d="M 85 316 V 356" fill="none" stroke="#3B5B8C" stroke-width="3"/>
+            <text x="96" y="320" fill="#3B5B8C" font-size="7.5" font-family="'Geist Mono', monospace">~ tuning · CHANGED</text>
+            <text x="96" y="340" fill="#0F2547" font-size="12" font-family="'Geist', sans-serif" font-weight="600">Parameter Update</text>
+            <text x="96" y="356" fill="#3B5B8C" font-size="9" font-family="'Geist Mono', monospace">human guesswork PR</text>
+          </g>
+
+          <g data-kind="component" data-object-id="estimate" data-status="unchanged" data-signature="out:latency:v1">
+            <rect data-role="bounds" x="84" y="416" width="168" height="64" rx="6" fill="#EFECE6" stroke="#3B5B8C" stroke-width="1.2"/>
+            <text x="96" y="432" fill="#3B5B8C" font-size="7.5" font-family="'Geist Mono', monospace">= estimate · UNCHANGED</text>
+            <text x="96" y="452" fill="#0F2547" font-size="12" font-family="'Geist', sans-serif" font-weight="600">p99 Latency Preds</text>
+            <text x="96" y="468" fill="#3B5B8C" font-size="9" font-family="'Geist Mono', monospace">y_hat[2048] (ms)</text>
+          </g>
+        </g>
+
+        <!-- Center Ledger -->
+        <text x="424" y="106" fill="#3B5B8C" font-size="9" font-family="'Geist Mono', monospace">01</text>
+        <text x="456" y="104" data-change="CHANGED" data-target="predictor" fill="#9A6F0B" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.06em">CHANGED · predictor<tspan x="456" y="126" fill="#0F2547" font-size="11.5" font-family="'Geist', sans-serif" letter-spacing="0">Magic numbers → parameterized X @ w + b</tspan></text>
+        <path d="M 456 142 H 776" stroke="rgba(15,37,71,0.14)" stroke-width="0.8"/>
+
+        <text x="424" y="166" fill="#3B5B8C" font-size="9" font-family="'Geist Mono', monospace">02</text>
+        <text x="456" y="164" data-change="REMOVED" data-target="ifelse" fill="#3B5B8C" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.06em">REMOVED · ifelse<tspan x="456" y="186" fill="#0F2547" font-size="11.5" font-family="'Geist', sans-serif" letter-spacing="0">Retire brittle hand-tuned if/else jump rules</tspan></text>
+        <path d="M 456 202 H 776" stroke="rgba(15,37,71,0.14)" stroke-width="0.8"/>
+
+        <text x="424" y="226" fill="#3B5B8C" font-size="9" font-family="'Geist Mono', monospace">03</text>
+        <text x="456" y="224" data-change="ADDED" data-target="lossgrad" fill="#9A6F0B" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.06em">ADDED · lossgrad<tspan x="456" y="246" fill="#0F2547" font-size="11.5" font-family="'Geist', sans-serif" letter-spacing="0">Introduce MSE loss + jax.value_and_grad</tspan></text>
+        <path d="M 456 262 H 776" stroke="rgba(15,37,71,0.14)" stroke-width="0.8"/>
+
+        <text x="424" y="286" fill="#3B5B8C" font-size="9" font-family="'Geist Mono', monospace">04</text>
+        <text x="456" y="284" data-change="CHANGED" data-target="tuning" fill="#3B5B8C" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.06em">CHANGED · tuning<tspan x="456" y="306" fill="#0F2547" font-size="11.5" font-family="'Geist', sans-serif" letter-spacing="0">Human PR guesswork → @jit gradient step</tspan></text>
+        <path d="M 456 322 H 776" stroke="rgba(15,37,71,0.14)" stroke-width="0.8"/>
+
+        <text x="424" y="346" fill="#3B5B8C" font-size="9" font-family="'Geist Mono', monospace">05</text>
+        <text x="456" y="344" data-change="REWIRED" data-target="r2" fill="#3B5B8C" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.06em">REWIRED · r2<tspan x="456" y="366" fill="#0F2547" font-size="11.5" font-family="'Geist', sans-serif" letter-spacing="0">Route predictions y_hat into MSE lossgrad</tspan></text>
+        <path d="M 456 382 H 776" stroke="rgba(15,37,71,0.14)" stroke-width="0.8"/>
+
+        <text x="424" y="406" fill="#3B5B8C" font-size="9" font-family="'Geist Mono', monospace">06</text>
+        <text x="456" y="404" data-change="REMOVED" data-target="r3" fill="#3B5B8C" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.06em">REMOVED · r3<tspan x="456" y="426" fill="#0F2547" font-size="11.5" font-family="'Geist', sans-serif" letter-spacing="0">Eliminate manual threshold adjustment cycle</tspan></text>
+        <path d="M 456 442 H 776" stroke="rgba(15,37,71,0.14)" stroke-width="0.8"/>
+
+        <text x="424" y="466" fill="#3B5B8C" font-size="9" font-family="'Geist Mono', monospace">07</text>
+        <text x="456" y="464" data-change="ADDED" data-target="r4" fill="#3B5B8C" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.06em">ADDED · r4<tspan x="456" y="486" fill="#0F2547" font-size="11.5" font-family="'Geist', sans-serif" letter-spacing="0">Feed exact gradients dL/dw into p - lr * g</tspan></text>
+
+        <text x="424" y="536" fill="#3B5B8C" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">PRESERVED</text>
+        <text x="424" y="554" fill="#3B5B8C" font-size="11" font-family="'Geist', sans-serif">Server telemetry · p99 latency predictions · r1 · r5</text>
+
+        <g data-snapshot="after" transform="translate(840 88)" data-grid="336 480 4">
+          <path data-kind="relationship" data-object-id="r1" data-status="unchanged" data-signature="telemetry:in" data-from="telemetry" data-to="predictor" d="M 168 64 V 96" fill="none" stroke="#3B5B8C" stroke-width="1.2" marker-end="url(#rules-vs-ml-arrow)"/>
+          <path data-kind="relationship" data-object-id="r2" data-status="rewired" data-signature="eval-output" data-from="predictor" data-to="lossgrad" d="M 168 160 V 192" fill="none" stroke="#3B5B8C" stroke-width="1.2" stroke-dasharray="8 3 2 3" marker-end="url(#rules-vs-ml-arrow)"/>
+          <path data-kind="relationship" data-object-id="r4" data-status="added" data-signature="autodiff-grads" data-from="lossgrad" data-to="tuning" d="M 168 256 V 304" fill="none" stroke="#3B5B8C" stroke-width="2" marker-end="url(#rules-vs-ml-arrow)"/>
+          <path data-kind="relationship" data-object-id="r5" data-status="unchanged" data-signature="emit-latency" data-from="tuning" data-to="estimate" d="M 168 368 V 416" fill="none" stroke="#3B5B8C" stroke-width="1.2" marker-end="url(#rules-vs-ml-arrow)"/>
+
+          <rect x="176" y="72" width="96" height="16" rx="2" fill="#F7F6F2"/>
+          <text x="180" y="84" fill="#3B5B8C" font-size="8" font-family="'Geist Mono', monospace">r1 · INPUT</text>
+          <rect x="176" y="168" width="96" height="16" rx="2" fill="#F7F6F2"/>
+          <text x="180" y="180" fill="#3B5B8C" font-size="8" font-family="'Geist Mono', monospace">r2 · RESIDUAL</text>
+          <rect x="176" y="272" width="108" height="16" rx="2" fill="#F7F6F2"/>
+          <text x="180" y="284" fill="#3B5B8C" font-size="8" font-family="'Geist Mono', monospace">r4 · EXACT GRAD</text>
+          <rect x="176" y="384" width="96" height="16" rx="2" fill="#F7F6F2"/>
+          <text x="180" y="396" fill="#3B5B8C" font-size="8" font-family="'Geist Mono', monospace">r5 · OUTPUT</text>
+
+          <g data-kind="component" data-object-id="telemetry" data-status="unchanged" data-signature="data:telemetry:v1">
+            <rect data-role="bounds" x="84" y="0" width="168" height="64" rx="6" fill="#EFECE6" stroke="#3B5B8C" stroke-width="1.2"/>
+            <text x="96" y="16" fill="#3B5B8C" font-size="7.5" font-family="'Geist Mono', monospace">= telemetry · UNCHANGED</text>
+            <text x="96" y="36" fill="#0F2547" font-size="12" font-family="'Geist', sans-serif" font-weight="600">Server Telemetry</text>
+            <text x="96" y="52" fill="#3B5B8C" font-size="9" font-family="'Geist Mono', monospace">X[2048, 4] float32</text>
+          </g>
+
+          <g data-kind="component" data-object-id="predictor" data-status="changed" data-signature="fn:linear-pytree:v2">
+            <rect data-role="bounds" x="84" y="96" width="168" height="64" rx="6" fill="#EFECE6" stroke="#3B5B8C" stroke-width="1.2"/>
+            <path d="M 85 108 V 148" fill="none" stroke="#3B5B8C" stroke-width="3"/>
+            <text x="96" y="112" fill="#3B5B8C" font-size="7.5" font-family="'Geist Mono', monospace">~ predictor · CHANGED</text>
+            <text x="96" y="132" fill="#0F2547" font-size="12" font-family="'Geist', sans-serif" font-weight="600">Linear PyTree Model</text>
+            <text x="96" y="148" fill="#3B5B8C" font-size="9" font-family="'Geist Mono', monospace">y_hat = X @ w + b</text>
+          </g>
+
+          <g data-kind="component" data-object-id="lossgrad" data-status="added" data-signature="jax:value_and_grad:v1">
+            <rect data-role="bounds" x="84" y="192" width="168" height="64" rx="6" fill="rgba(197,146,22,0.12)" stroke="#C59216" stroke-width="1.4"/>
+            <rect x="88" y="196" width="160" height="56" rx="4" fill="none" stroke="#C59216" stroke-width="0.8"/>
+            <text x="96" y="208" fill="#9A6F0B" font-size="7.5" font-family="'Geist Mono', monospace">+ lossgrad · ADDED</text>
+            <text x="96" y="228" fill="#0F2547" font-size="12" font-family="'Geist', sans-serif" font-weight="600">MSE + value_and_grad</text>
+            <text x="96" y="244" fill="#9A6F0B" font-size="9" font-family="'Geist Mono', monospace">mean((y_hat - y)^2)</text>
+          </g>
+
+          <g data-kind="component" data-object-id="tuning" data-status="changed" data-signature="update:tree-map-gd">
+            <rect data-role="bounds" x="84" y="304" width="168" height="64" rx="6" fill="#EFECE6" stroke="#3B5B8C" stroke-width="1.2"/>
+            <path d="M 85 316 V 356" fill="none" stroke="#3B5B8C" stroke-width="3"/>
+            <text x="96" y="320" fill="#3B5B8C" font-size="7.5" font-family="'Geist Mono', monospace">~ tuning · CHANGED</text>
+            <text x="96" y="340" fill="#0F2547" font-size="12" font-family="'Geist', sans-serif" font-weight="600">Parameter Update</text>
+            <text x="96" y="356" fill="#3B5B8C" font-size="9" font-family="'Geist Mono', monospace">p - lr * g (1345x)</text>
+          </g>
+
+          <g data-kind="component" data-object-id="estimate" data-status="unchanged" data-signature="out:latency:v1">
+            <rect data-role="bounds" x="84" y="416" width="168" height="64" rx="6" fill="#EFECE6" stroke="#3B5B8C" stroke-width="1.2"/>
+            <text x="96" y="432" fill="#3B5B8C" font-size="7.5" font-family="'Geist Mono', monospace">= estimate · UNCHANGED</text>
+            <text x="96" y="452" fill="#0F2547" font-size="12" font-family="'Geist', sans-serif" font-weight="600">p99 Latency Preds</text>
+            <text x="96" y="468" fill="#3B5B8C" font-size="9" font-family="'Geist Mono', monospace">y_hat[2048] (ms)</text>
+          </g>
+        </g>
+
+        <path d="M 24 592 H 1176" stroke="rgba(15,37,71,0.14)" stroke-width="1"/>
+        <rect x="24" y="608" width="20" height="16" rx="3" fill="none" stroke="#3B5B8C" stroke-width="1"/>
+        <text x="54" y="620" fill="#3B5B8C" font-size="11" font-family="'Geist', sans-serif">= Unchanged</text>
+        <rect x="210" y="608" width="20" height="16" rx="3" fill="rgba(197,146,22,0.12)" stroke="#C59216" stroke-width="1.2"/>
+        <text x="240" y="620" fill="#9A6F0B" font-size="11" font-family="'Geist', sans-serif">+ Added (Focal)</text>
+        <rect x="420" y="608" width="20" height="16" rx="3" fill="none" stroke="#3B5B8C" stroke-width="1" stroke-dasharray="4 4"/>
+        <text x="450" y="620" fill="#3B5B8C" font-size="11" font-family="'Geist', sans-serif">− Removed</text>
+        <rect x="612" y="608" width="20" height="16" rx="3" fill="none" stroke="#3B5B8C" stroke-width="1"/>
+        <path d="M 613 612 V 620" stroke="#3B5B8C" stroke-width="3"/>
+        <text x="642" y="620" fill="#3B5B8C" font-size="11" font-family="'Geist', sans-serif">~ Changed</text>
+        <path d="M 820 616 H 844" fill="none" stroke="#3B5B8C" stroke-width="1.2" stroke-dasharray="8 3 2 3" marker-end="url(#rules-vs-ml-arrow)"/>
+        <text x="854" y="620" fill="#3B5B8C" font-size="11" font-family="'Geist', sans-serif">⇢ Rewired</text>
+        <text x="1176" y="644" fill="#3B5B8C" font-size="9" font-family="'Geist Mono', monospace" text-anchor="end">6 components · 5 relationships · 7 changes</text>
+      </svg>
+    </div>
+    <p class="scroll-hint">Scroll horizontally to compare hardcoded software rules, the changes ledger, and the learned JAX loop.</p>
+  </main>
+</body>
+</html>

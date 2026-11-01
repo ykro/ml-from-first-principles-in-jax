@@ -1,0 +1,98 @@
+{
+  "environment": {
+    "python_version": "3.12.11",
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "processor": "arm",
+    "jax_version": "0.12.0.1",
+    "numpy_version": "2.5.4",
+    "jax_backend": "cpu",
+    "jax_device": "cpu:0"
+  },
+  "experiments": {
+    "01_rules_vs_learned_weights": {
+      "experiment": "01_rules_vs_learned_weights",
+      "backend": "cpu",
+      "n_samples": 2048,
+      "n_steps": 250,
+      "rules_mse": 531.3102,
+      "initial_ml_mse": 5811.4399,
+      "learned_mse": 0.3949,
+      "mse_reduction_vs_rules": 1345.28,
+      "true_w": [
+        34.5,
+        -4.2,
+        19.8,
+        11.4
+      ],
+      "learned_w": [
+        34.37,
+        -4.28,
+        19.717,
+        11.249
+      ],
+      "true_b": 8.5,
+      "learned_b": 9.001,
+      "max_weight_error": 0.1513,
+      "train_time_ms": 7.701
+    },
+    "02_gradient_descent_geometry": {
+      "experiment": "02_gradient_descent_geometry",
+      "backend": "cpu",
+      "n_steps": 180,
+      "initial_loss": 454.0179,
+      "sgd_final_loss": 8.564543,
+      "momentum_final_loss": 0.45256,
+      "adam_final_loss": 1e-06,
+      "sgd_steps_to_0_05": 180,
+      "momentum_steps_to_0_05": 180,
+      "adam_steps_to_0_05": 79,
+      "eager_loop_ms": 2611.6963,
+      "compiled_scan_ms": 3.4312,
+      "speedup": 761.17
+    },
+    "03_logistic_classification_cross_entropy": {
+      "experiment": "03_logistic_classification_cross_entropy",
+      "backend": "cpu",
+      "n_samples": 1800,
+      "naive_overflow_nan": true,
+      "stable_logsumexp_finite": true,
+      "max_diff_vs_jax_nn": 0.0,
+      "initial_loss": 1.0986,
+      "final_loss": 0.0113,
+      "initial_accuracy": 33.33,
+      "final_accuracy": 99.94,
+      "train_time_ms": 12.406
+    },
+    "04_two_layer_mlp_from_scratch": {
+      "experiment": "04_two_layer_mlp_from_scratch",
+      "backend": "cpu",
+      "n_samples": 1500,
+      "hidden_dim": 64,
+      "n_steps": 350,
+      "linear_collapse_max_diff": 1.430511474609375e-06,
+      "initial_accuracy": 33.6,
+      "linear_stack_accuracy": 32.53,
+      "mlp_gelu_accuracy": 99.47,
+      "linear_stack_final_loss": 1.116,
+      "mlp_gelu_final_loss": 0.0906,
+      "train_time_ms": 101.3096
+    },
+    "05_overfitting_and_weight_decay": {
+      "experiment": "05_overfitting_and_weight_decay",
+      "backend": "cpu",
+      "n_train": 32,
+      "n_val": 256,
+      "n_features": 28,
+      "overfit_train_mse": 0.29,
+      "overfit_val_mse": 9.9728,
+      "overfit_val_to_train_ratio": 34.39,
+      "overfit_weight_norm": 3.43,
+      "regularized_train_mse": 0.6584,
+      "regularized_val_mse": 2.2289,
+      "regularized_weight_norm": 0.7,
+      "val_mse_reduction_ratio": 4.47,
+      "elapsed_ms": 108.7588
+    }
+  },
+  "all_verifications_passed": true
+}

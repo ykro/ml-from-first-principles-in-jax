@@ -1,0 +1,11 @@
+title = "Gitleaks configuration for ml-from-first-principles-in-jax"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Allowlist for public benchmark reports and SVG diagrams"
+paths = [
+  '''benchmarks/latest_results\.json''',
+  '''diagrams/.*\.(svg|html|png)''',
+]

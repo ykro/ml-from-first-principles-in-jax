@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 1200 660" xmlns="http://www.w3.org/2000/svg" data-diagram="architecture-delta" role="img" aria-labelledby="overfit-vs-reg-title overfit-vs-reg-desc" id="d-03-overfitting-vs-regularization-root">
+        <title id="overfit-vs-reg-title">Unregularized overfitting vs L2 weight decay and validation checkpoint gate</title>
+        <desc id="overfit-vs-reg-desc">Architecture delta comparing an unregularized training pipeline that memorizes noisy features (Val MSE 9.97) against a regularized pipeline with L2 Weight Decay and a Validation Gate reducing validation error 4.47x (Val MSE 2.23).</desc>
+        <defs>
+      <style>@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500;600&amp;family=Noto+Serif:ital@0;1&amp;family=Noto+Sans+KR:wght@400;500;600&amp;family=Noto+Serif+KR:wght@400&amp;family=Noto+Sans+TC:wght@400;500;600&amp;family=Noto+Serif+TC:wght@400&amp;display=swap');
+      #d-03-overfitting-vs-regularization-root { --color-paper: #F7F6F2;
+      --color-paper-2: #EFECE6;
+      --color-ink: #0F2547;
+      --color-muted: #3B5B8C;
+      --color-rule: rgba(15,37,71,0.14);
+      --color-accent: #C59216;
+      --color-accent-text: #9A6F0B;
+      --font-sans: 'Geist', system-ui, sans-serif;
+      --font-serif: 'Instrument Serif', serif;
+      --font-mono: 'Geist Mono', ui-monospace, monospace; }
+      #d-03-overfitting-vs-regularization-root { font-family: var(--font-sans); color: var(--color-ink); }
+      #d-03-overfitting-vs-regularization-root .diagram-container { width: 100%; overflow-x: auto; }
+      #d-03-overfitting-vs-regularization-root .diagram-container:focus-visible { outline: 2px solid var(--color-muted); outline-offset: 4px; }
+      #d-03-overfitting-vs-regularization-root .scroll-hint { display: none; margin: 1rem 0 0; font-size: 0.8125rem; color: var(--color-muted); }
+      #d-03-overfitting-vs-regularization-root .scroll-hint { display: block; }
+      #d-03-overfitting-vs-regularization-root .diagram-container { overflow-x: visible; }</style>
+          <marker id="d-03-overfitting-vs-regularization-overfit-vs-reg-arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto" markerUnits="userSpaceOnUse"><polygon points="0 0, 8 3, 0 6" fill="#3B5B8C"/></marker>
+        </defs>
+        <rect width="1200" height="660" fill="#F7F6F2"/>
+        <text x="24" y="28" fill="#0F2547" font-size="14" font-family="'Geist', sans-serif" font-weight="600">Before · Unregularized Memorization</text>
+        <text x="24" y="50" fill="#3B5B8C" font-size="10" font-family="'Geist', sans-serif">Train MSE = 0.29 · Val MSE = 9.97 (34.4x gap)</text>
+        <text x="424" y="28" fill="#0F2547" font-size="14" font-family="'Geist', sans-serif" font-weight="600">Changes Ledger</text>
+        <text x="424" y="50" fill="#3B5B8C" font-size="10" font-family="'Geist', sans-serif">Penalize spurious weight norm and gate checkpoints on unseen data</text>
+        <text x="840" y="28" fill="#0F2547" font-size="14" font-family="'Geist', sans-serif" font-weight="600">After · L2 Weight Decay + Val Gate</text>
+        <text x="840" y="50" fill="#3B5B8C" font-size="10" font-family="'Geist', sans-serif">||w||2 shrunk 3.43 → 0.70 · Val MSE = 2.23 (4.47x lower)</text>
+        <path d="M 392 8 V 568 M 808 8 V 568" stroke="#0f2547" stroke-opacity="0.14" stroke-width="1"/>
+
+        <g data-snapshot="before" transform="translate(24 88)" data-grid="336 480 4">
+          <path data-kind="relationship" data-object-id="r1" data-status="unchanged" data-signature="split:in" data-from="dataset" data-to="objective" d="M 168 64 V 96" fill="none" stroke="#3B5B8C" stroke-width="1.2" marker-end="url(#d-03-overfitting-vs-regularization-overfit-vs-reg-arrow)"/>
+          <path data-kind="relationship" data-object-id="r2" data-status="rewired" data-signature="grad-step" data-from="objective" data-to="memorize" d="M 168 160 V 192" fill="none" stroke="#3B5B8C" stroke-width="1.2" stroke-dasharray="8 3 2 3" marker-end="url(#d-03-overfitting-vs-regularization-overfit-vs-reg-arrow)"/>
+          <path data-kind="relationship" data-object-id="r3" data-status="removed" data-signature="blind-last-step" data-from="memorize" data-to="weights" d="M 168 256 V 304" fill="none" stroke="#3B5B8C" stroke-width="1.2" stroke-dasharray="4 4" marker-end="url(#d-03-overfitting-vs-regularization-overfit-vs-reg-arrow)"/>
+          <path data-kind="relationship" data-object-id="r5" data-status="unchanged" data-signature="eval-val" data-from="weights" data-to="generalize" d="M 168 368 V 416" fill="none" stroke="#3B5B8C" stroke-width="1.2" marker-end="url(#d-03-overfitting-vs-regularization-overfit-vs-reg-arrow)"/>
+
+          <rect x="176" y="72" width="96" height="16" rx="2" fill="#F7F6F2"/>
+          <text x="180" y="84" fill="#3B5B8C" font-size="8" font-family="'Geist Mono', monospace">r1 · INPUT</text>
+          <rect x="176" y="168" width="96" height="16" rx="2" fill="#F7F6F2"/>
+          <text x="180" y="180" fill="#3B5B8C" font-size="8" font-family="'Geist Mono', monospace">r2 · REWIRED</text>
+          <rect x="176" y="272" width="108" height="16" rx="2" fill="#F7F6F2"/>
+          <text x="180" y="284" fill="#3B5B8C" font-size="8" font-family="'Geist Mono', monospace">r3 · UNGATED</text>
+          <rect x="176" y="384" width="96" height="16" rx="2" fill="#F7F6F2"/>
+          <text x="180" y="396" fill="#3B5B8C" font-size="8" font-family="'Geist Mono', monospace">r5 · VAL EVAL</text>
+
+          <g data-kind="component" data-object-id="dataset" data-status="unchanged" data-signature="data:incidents:v1">
+            <rect data-role="bounds" x="84" y="0" width="168" height="64" rx="6" fill="#EFECE6" stroke="#3B5B8C" stroke-width="1.2"/>
+            <text x="96" y="16" fill="#3B5B8C" font-size="7.5" font-family="'Geist Mono', monospace">= dataset · UNCHANGED</text>
+            <text x="96" y="36" fill="#0F2547" font-size="12" font-family="'Geist', sans-serif" font-weight="600">Incident Split</text>
+            <text x="96" y="52" fill="#3B5B8C" font-size="9" font-family="'Geist Mono', monospace">32 train · 28 metrics</text>
+          </g>
+
+          <g data-kind="component" data-object-id="objective" data-status="changed" data-signature="loss:mse-only:v1">
+            <rect data-role="bounds" x="84" y="96" width="168" height="64" rx="6" fill="#c59216" fill-opacity="0.12" stroke="#C59216" stroke-width="1.4"/>
+            <path d="M 85 108 V 148" fill="none" stroke="#C59216" stroke-width="3"/>
+            <text x="96" y="112" fill="#9A6F0B" font-size="7.5" font-family="'Geist Mono', monospace">~ objective · CHANGED</text>
+            <text x="96" y="132" fill="#0F2547" font-size="12" font-family="'Geist', sans-serif" font-weight="600">Training Objective</text>
+            <text x="96" y="148" fill="#9A6F0B" font-size="9" font-family="'Geist Mono', monospace">MSE only (wd = 0.0)</text>
+          </g>
+
+          <g data-kind="component" data-object-id="memorize" data-status="removed" data-signature="fit:spurious-noise:v1">
+            <rect data-role="bounds" x="84" y="192" width="168" height="64" rx="6" fill="#EFECE6" stroke="#3B5B8C" stroke-width="1.2" stroke-dasharray="4 4"/>
+            <text x="96" y="208" fill="#3B5B8C" font-size="7.5" font-family="'Geist Mono', monospace">− memorize · REMOVED</text>
+            <text x="96" y="228" fill="#0F2547" font-size="12" font-family="'Geist', sans-serif" font-weight="600">Noise Memorization</text>
+            <text x="96" y="244" fill="#3B5B8C" font-size="9" font-family="'Geist Mono', monospace">fits 24 noisy cols</text>
+          </g>
+
+          <g data-kind="component" data-object-id="weights" data-status="changed" data-signature="params:unbounded-norm">
+            <rect data-role="bounds" x="84" y="304" width="168" height="64" rx="6" fill="#EFECE6" stroke="#3B5B8C" stroke-width="1.2"/>
+            <path d="M 85 316 V 356" fill="none" stroke="#3B5B8C" stroke-width="3"/>
+            <text x="96" y="320" fill="#3B5B8C" font-size="7.5" font-family="'Geist Mono', monospace">~ weights · CHANGED</text>
+            <text x="96" y="340" fill="#0F2547" font-size="12" font-family="'Geist', sans-serif" font-weight="600">Selected Weights</text>
+            <text x="96" y="356" fill="#3B5B8C" font-size="9" font-family="'Geist Mono', monospace">||w||2 = 3.43 · step 800</text>
+          </g>
+
+          <g data-kind="component" data-object-id="generalize" data-status="unchanged" data-signature="eval:unseen-val:v1">
+            <rect data-role="bounds" x="84" y="416" width="168" height="64" rx="6" fill="#EFECE6" stroke="#3B5B8C" stroke-width="1.2"/>
+            <text x="96" y="432" fill="#3B5B8C" font-size="7.5" font-family="'Geist Mono', monospace">= generalize · UNCHANGED</text>
+            <text x="96" y="452" fill="#0F2547" font-size="12" font-family="'Geist', sans-serif" font-weight="600">Unseen Validation</text>
+            <text x="96" y="468" fill="#3B5B8C" font-size="9" font-family="'Geist Mono', monospace">256 holdout samples</text>
+          </g>
+        </g>
+
+        <!-- Center Ledger -->
+        <text x="424" y="106" fill="#3B5B8C" font-size="9" font-family="'Geist Mono', monospace">01</text>
+        <text x="456" y="104" data-change="CHANGED" data-target="objective" fill="#9A6F0B" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.06em">CHANGED · objective<tspan x="456" y="126" fill="#0F2547" font-size="11.5" font-family="'Geist', sans-serif" letter-spacing="0">Add L2 penalty 0.5 * wd * sum(w^2) (wd=0.35)</tspan></text>
+        <path d="M 456 142 H 776" stroke="#0f2547" stroke-opacity="0.14" stroke-width="0.8"/>
+
+        <text x="424" y="166" fill="#3B5B8C" font-size="9" font-family="'Geist Mono', monospace">02</text>
+        <text x="456" y="164" data-change="REMOVED" data-target="memorize" fill="#3B5B8C" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.06em">REMOVED · memorize<tspan x="456" y="186" fill="#0F2547" font-size="11.5" font-family="'Geist', sans-serif" letter-spacing="0">Suppress spurious weights on 24 noisy columns</tspan></text>
+        <path d="M 456 202 H 776" stroke="#0f2547" stroke-opacity="0.14" stroke-width="0.8"/>
+
+        <text x="424" y="226" fill="#3B5B8C" font-size="9" font-family="'Geist Mono', monospace">03</text>
+        <text x="456" y="224" data-change="ADDED" data-target="valgate" fill="#9A6F0B" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.06em">ADDED · valgate<tspan x="456" y="246" fill="#0F2547" font-size="11.5" font-family="'Geist', sans-serif" letter-spacing="0">Gate checkpoint via jnp.where(val &lt; best)</tspan></text>
+        <path d="M 456 262 H 776" stroke="#0f2547" stroke-opacity="0.14" stroke-width="0.8"/>
+
+        <text x="424" y="286" fill="#3B5B8C" font-size="9" font-family="'Geist Mono', monospace">04</text>
+        <text x="456" y="284" data-change="CHANGED" data-target="weights" fill="#3B5B8C" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.06em">CHANGED · weights<tspan x="456" y="306" fill="#0F2547" font-size="11.5" font-family="'Geist', sans-serif" letter-spacing="0">Shrink ||w||2 to 0.70 and cut Val MSE 4.47x</tspan></text>
+        <path d="M 456 322 H 776" stroke="#0f2547" stroke-opacity="0.14" stroke-width="0.8"/>
+
+        <text x="424" y="346" fill="#3B5B8C" font-size="9" font-family="'Geist Mono', monospace">05</text>
+        <text x="456" y="344" data-change="REWIRED" data-target="r2" fill="#3B5B8C" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.06em">REWIRED · r2<tspan x="456" y="366" fill="#0F2547" font-size="11.5" font-family="'Geist', sans-serif" letter-spacing="0">Route regularized updates into Validation Gate</tspan></text>
+        <path d="M 456 382 H 776" stroke="#0f2547" stroke-opacity="0.14" stroke-width="0.8"/>
+
+        <text x="424" y="406" fill="#3B5B8C" font-size="9" font-family="'Geist Mono', monospace">06</text>
+        <text x="456" y="404" data-change="REMOVED" data-target="r3" fill="#3B5B8C" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.06em">REMOVED · r3<tspan x="456" y="426" fill="#0F2547" font-size="11.5" font-family="'Geist', sans-serif" letter-spacing="0">Eliminate blind final-step weight export</tspan></text>
+        <path d="M 456 442 H 776" stroke="#0f2547" stroke-opacity="0.14" stroke-width="0.8"/>
+
+        <text x="424" y="466" fill="#3B5B8C" font-size="9" font-family="'Geist Mono', monospace">07</text>
+        <text x="456" y="464" data-change="ADDED" data-target="r4" fill="#3B5B8C" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.06em">ADDED · r4<tspan x="456" y="486" fill="#0F2547" font-size="11.5" font-family="'Geist', sans-serif" letter-spacing="0">Promote only validation-verified PyTree</tspan></text>
+
+        <text x="424" y="536" fill="#3B5B8C" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">PRESERVED</text>
+        <text x="424" y="554" fill="#3B5B8C" font-size="11" font-family="'Geist', sans-serif">Incident split · Unseen validation evaluation · r1 · r5</text>
+
+        <g data-snapshot="after" transform="translate(840 88)" data-grid="336 480 4">
+          <path data-kind="relationship" data-object-id="r1" data-status="unchanged" data-signature="split:in" data-from="dataset" data-to="objective" d="M 168 64 V 96" fill="none" stroke="#3B5B8C" stroke-width="1.2" marker-end="url(#d-03-overfitting-vs-regularization-overfit-vs-reg-arrow)"/>
+          <path data-kind="relationship" data-object-id="r2" data-status="rewired" data-signature="grad-step" data-from="objective" data-to="valgate" d="M 168 160 V 192" fill="none" stroke="#3B5B8C" stroke-width="1.2" stroke-dasharray="8 3 2 3" marker-end="url(#d-03-overfitting-vs-regularization-overfit-vs-reg-arrow)"/>
+          <path data-kind="relationship" data-object-id="r4" data-status="added" data-signature="best-checkpoint" data-from="valgate" data-to="weights" d="M 168 256 V 304" fill="none" stroke="#3B5B8C" stroke-width="2" marker-end="url(#d-03-overfitting-vs-regularization-overfit-vs-reg-arrow)"/>
+          <path data-kind="relationship" data-object-id="r5" data-status="unchanged" data-signature="eval-val" data-from="weights" data-to="generalize" d="M 168 368 V 416" fill="none" stroke="#3B5B8C" stroke-width="1.2" marker-end="url(#d-03-overfitting-vs-regularization-overfit-vs-reg-arrow)"/>
+
+          <rect x="176" y="72" width="96" height="16" rx="2" fill="#F7F6F2"/>
+          <text x="180" y="84" fill="#3B5B8C" font-size="8" font-family="'Geist Mono', monospace">r1 · INPUT</text>
+          <rect x="176" y="168" width="96" height="16" rx="2" fill="#F7F6F2"/>
+          <text x="180" y="180" fill="#3B5B8C" font-size="8" font-family="'Geist Mono', monospace">r2 · L2 GRADS</text>
+          <rect x="176" y="272" width="108" height="16" rx="2" fill="#F7F6F2"/>
+          <text x="180" y="284" fill="#3B5B8C" font-size="8" font-family="'Geist Mono', monospace">r4 · BEST PARAMS</text>
+          <rect x="176" y="384" width="96" height="16" rx="2" fill="#F7F6F2"/>
+          <text x="180" y="396" fill="#3B5B8C" font-size="8" font-family="'Geist Mono', monospace">r5 · VAL EVAL</text>
+
+          <g data-kind="component" data-object-id="dataset" data-status="unchanged" data-signature="data:incidents:v1">
+            <rect data-role="bounds" x="84" y="0" width="168" height="64" rx="6" fill="#EFECE6" stroke="#3B5B8C" stroke-width="1.2"/>
+            <text x="96" y="16" fill="#3B5B8C" font-size="7.5" font-family="'Geist Mono', monospace">= dataset · UNCHANGED</text>
+            <text x="96" y="36" fill="#0F2547" font-size="12" font-family="'Geist', sans-serif" font-weight="600">Incident Split</text>
+            <text x="96" y="52" fill="#3B5B8C" font-size="9" font-family="'Geist Mono', monospace">32 train · 28 metrics</text>
+          </g>
+
+          <g data-kind="component" data-object-id="objective" data-status="changed" data-signature="loss:mse-plus-l2:v2">
+            <rect data-role="bounds" x="84" y="96" width="168" height="64" rx="6" fill="#EFECE6" stroke="#3B5B8C" stroke-width="1.2"/>
+            <path d="M 85 108 V 148" fill="none" stroke="#3B5B8C" stroke-width="3"/>
+            <text x="96" y="112" fill="#3B5B8C" font-size="7.5" font-family="'Geist Mono', monospace">~ objective · CHANGED</text>
+            <text x="96" y="132" fill="#0F2547" font-size="12" font-family="'Geist', sans-serif" font-weight="600">Training Objective</text>
+            <text x="96" y="148" fill="#3B5B8C" font-size="9" font-family="'Geist Mono', monospace">MSE + 0.5*wd*||w||^2</text>
+          </g>
+
+          <g data-kind="component" data-object-id="valgate" data-status="added" data-signature="gate:early-stop:v1">
+            <rect data-role="bounds" x="84" y="192" width="168" height="64" rx="6" fill="#c59216" fill-opacity="0.12" stroke="#C59216" stroke-width="1.4"/>
+            <rect x="88" y="196" width="160" height="56" rx="4" fill="none" stroke="#C59216" stroke-width="0.8"/>
+            <text x="96" y="208" fill="#9A6F0B" font-size="7.5" font-family="'Geist Mono', monospace">+ valgate · ADDED</text>
+            <text x="96" y="228" fill="#0F2547" font-size="12" font-family="'Geist', sans-serif" font-weight="600">Validation Gate</text>
+            <text x="96" y="244" fill="#9A6F0B" font-size="9" font-family="'Geist Mono', monospace">val_mse &lt; best_val</text>
+          </g>
+
+          <g data-kind="component" data-object-id="weights" data-status="changed" data-signature="params:regularized-best">
+            <rect data-role="bounds" x="84" y="304" width="168" height="64" rx="6" fill="#EFECE6" stroke="#3B5B8C" stroke-width="1.2"/>
+            <path d="M 85 316 V 356" fill="none" stroke="#3B5B8C" stroke-width="3"/>
+            <text x="96" y="320" fill="#3B5B8C" font-size="7.5" font-family="'Geist Mono', monospace">~ weights · CHANGED</text>
+            <text x="96" y="340" fill="#0F2547" font-size="12" font-family="'Geist', sans-serif" font-weight="600">Selected Weights</text>
+            <text x="96" y="356" fill="#3B5B8C" font-size="9" font-family="'Geist Mono', monospace">||w||2 = 0.70 · 4.47x</text>
+          </g>
+
+          <g data-kind="component" data-object-id="generalize" data-status="unchanged" data-signature="eval:unseen-val:v1">
+            <rect data-role="bounds" x="84" y="416" width="168" height="64" rx="6" fill="#EFECE6" stroke="#3B5B8C" stroke-width="1.2"/>
+            <text x="96" y="432" fill="#3B5B8C" font-size="7.5" font-family="'Geist Mono', monospace">= generalize · UNCHANGED</text>
+            <text x="96" y="452" fill="#0F2547" font-size="12" font-family="'Geist', sans-serif" font-weight="600">Unseen Validation</text>
+            <text x="96" y="468" fill="#3B5B8C" font-size="9" font-family="'Geist Mono', monospace">256 holdout samples</text>
+          </g>
+        </g>
+
+        <path d="M 24 592 H 1176" stroke="#0f2547" stroke-opacity="0.14" stroke-width="1"/>
+        <rect x="24" y="608" width="20" height="16" rx="3" fill="none" stroke="#3B5B8C" stroke-width="1"/>
+        <text x="54" y="620" fill="#3B5B8C" font-size="11" font-family="'Geist', sans-serif">= Unchanged</text>
+        <rect x="210" y="608" width="20" height="16" rx="3" fill="#c59216" fill-opacity="0.12" stroke="#C59216" stroke-width="1.2"/>
+        <text x="240" y="620" fill="#9A6F0B" font-size="11" font-family="'Geist', sans-serif">+ Added (Focal)</text>
+        <rect x="420" y="608" width="20" height="16" rx="3" fill="none" stroke="#3B5B8C" stroke-width="1" stroke-dasharray="4 4"/>
+        <text x="450" y="620" fill="#3B5B8C" font-size="11" font-family="'Geist', sans-serif">− Removed</text>
+        <rect x="612" y="608" width="20" height="16" rx="3" fill="none" stroke="#3B5B8C" stroke-width="1"/>
+        <path d="M 613 612 V 620" stroke="#3B5B8C" stroke-width="3"/>
+        <text x="642" y="620" fill="#3B5B8C" font-size="11" font-family="'Geist', sans-serif">~ Changed</text>
+        <path d="M 820 616 H 844" fill="none" stroke="#3B5B8C" stroke-width="1.2" stroke-dasharray="8 3 2 3" marker-end="url(#d-03-overfitting-vs-regularization-overfit-vs-reg-arrow)"/>
+        <text x="854" y="620" fill="#3B5B8C" font-size="11" font-family="'Geist', sans-serif">⇢ Rewired</text>
+        <text x="1176" y="644" fill="#3B5B8C" font-size="9" font-family="'Geist Mono', monospace" text-anchor="end">6 components · 5 relationships · 7 changes</text>
+      </svg>
