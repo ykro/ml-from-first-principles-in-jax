@@ -11,3 +11,4 @@ __pycache__/
 *.key
 service-account*.json
 credentials*.json
+uv.lock
