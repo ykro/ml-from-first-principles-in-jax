@@ -36,7 +36,7 @@ def ill_conditioned_loss(
     features: jax.Array,
     targets: jax.Array,
 ) -> jax.Array:
-    """Anisotropic regression loss with condition number ~50 across feature scales."""
+    """Anisotropic regression loss: feature scales from 8.0 down to 0.15 (a ravine)."""
     preds = features @ params["w"] + params["b"]
     residual = preds - targets
     return 0.5 * jnp.mean(jnp.square(residual))

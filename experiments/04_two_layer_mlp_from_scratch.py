@@ -7,7 +7,7 @@ Demonstrates for Software Engineers:
 2. Why zero initialization breaks symmetry (all hidden neurons compute identical
    gradients) and how He/Xavier variance scaling with `jax.random.split` solves it.
 3. A complete 2-layer MLP (`Linear -> GELU -> Linear -> LogSoftmax`) trained with
-   `@jax.jit` and `jax.value_and_grad` from ~33% random accuracy to >98% accuracy.
+   `@jax.jit` and `jax.value_and_grad` from ~33% random accuracy to >97% train and test accuracy.
 
 How to read the numbers: train accuracy is measured on the 1500 points used for the
 gradients; test accuracy on 1500 new points from the same rings (different key). The
