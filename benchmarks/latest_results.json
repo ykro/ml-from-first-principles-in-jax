@@ -6,14 +6,14 @@
     "cpu_model": "Apple M1 Max",
     "cpu_count": 10,
     "load_average_before": [
-      24.85,
-      24.31,
-      23.28
+      10.75,
+      8.83,
+      6.74
     ],
     "load_average_after": [
-      21.51,
-      23.57,
-      23.04
+      12.56,
+      9.38,
+      6.98
     ],
     "timing": "median ms after a warmup; varies run to run",
     "jax_version": "0.12.0.1",
@@ -56,7 +56,7 @@
       "closed_form_b": 8.456,
       "learned_vs_closed_form_ratio": 1.052,
       "noise_floor_mse": 0.3764,
-      "median_step_ms": 0.0523,
+      "median_step_ms": 0.1997,
       "timed_steps": 250
     },
     "02_gradient_descent_geometry": {
@@ -93,11 +93,11 @@
           "steps_to_0_05": 69
         }
       },
-      "eager_loop_ms": 1426.9655,
-      "jit_step_loop_ms": 5.1877,
-      "compiled_scan_ms": 2.4253,
-      "speedup_vs_eager": 588.37,
-      "speedup_vs_jit_step_loop": 2.14,
+      "eager_loop_ms": 2300.7283,
+      "jit_step_loop_ms": 8.7225,
+      "compiled_scan_ms": 3.2412,
+      "speedup_vs_eager": 709.85,
+      "speedup_vs_jit_step_loop": 2.69,
       "timing_repeats": {
         "eager": 3,
         "jit_step_loop": 15,
@@ -133,7 +133,7 @@
       "n_test": 900,
       "test_accuracy": 100.0,
       "n_steps": 200,
-      "median_step_ms": 0.1779
+      "median_step_ms": 0.1202
     },
     "04_two_layer_mlp_from_scratch": {
       "experiment": "04_two_layer_mlp_from_scratch",
@@ -153,7 +153,7 @@
       "he_init_distinct_hidden_units": 64,
       "zero_init_distinct_hidden_units": 1,
       "zero_init_accuracy": 33.33,
-      "median_train_ms": 258.8036
+      "median_train_ms": 159.3994
     },
     "05_overfitting_and_weight_decay": {
       "experiment": "05_overfitting_and_weight_decay",
@@ -178,7 +178,7 @@
       },
       "test_noise_floor_mse": 0.0103,
       "test_mse_reduction_ratio": 3.4,
-      "median_800_step_scan_ms": 2.9087
+      "median_800_step_scan_ms": 0.948
     }
   },
   "all_verifications_passed": true

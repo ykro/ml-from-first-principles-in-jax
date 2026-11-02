@@ -2,7 +2,7 @@
 THE OUTSIDE JUDGE — ML from First Principles in JAX Verification Report
 ============================================================================================
 Runtime : Python 3.12.11 | JAX 0.12.0.1 | NumPy 2.5.4 | Backend: cpu
-CPU     : Apple M1 Max (10 cores) | 1-min load average 24.85 before, 21.51 after
+CPU     : Apple M1 Max (10 cores) | 1-min load average 10.75 before, 12.56 after
 --------------------------------------------------------------------------------------------
 Experiment                     | Baseline           | JAX ML           | Result
 --------------------------------------------------------------------------------------------
@@ -10,8 +10,8 @@ Experiment                     | Baseline           | JAX ML           | Result
     fair: closed-form least squares 0.3754 (learned is 5.2% above it)
 02. Optimizers, 180 steps      | SGD 8.5645         | Adam 0.000001    | <0.05 at step 79
     fair: best lr each -> SGD never, Momentum step 171, Adam step 69
-02. Same work, timing          | eager 1426.97 ms   | scan 2.43 ms     | 588.37x
-    fair: Python loop of @jit step 5.19 ms -> scan 2.14x faster
+02. Same work, timing          | eager 2300.73 ms   | scan 3.24 ms     | 709.85x
+    fair: Python loop of @jit step 8.72 ms -> scan 2.69x faster
 03. LogSumExp + cross-entropy  | naive: nan         | stable: finite   | diff 0.0e+00
     accuracy 33.33% -> train 99.94%, held-out test 100.00%
 04. MLP vs linear stack        | linear 32.53%      | MLP 99.47%       | train acc
