@@ -3,7 +3,7 @@
 - **Por qué es relevante:** La mayoría de cursos presentan Machine Learning como una caja negra de capas prefabricadas. Para un ingeniero de software que ya conoce `jax.numpy`, `@jax.jit`, `jax.grad` y `jax.vmap` ([jax-for-software-devs](https://github.com/ykro/jax-for-software-devs)), un modelo de Machine Learning se entiende mucho mejor como una función parametrizada cuyos argumentos `params` se ajustan automáticamente minimizando una `loss function` con derivadas exactas.
 - **Para quién es:** Desarrolladores de software, ingenieros backend y arquitectos de sistemas que quieren construir intuición matemática e ingenieril sólida sobre regresión, `SGD`/`Momentum`/`Adam`, estabilidad numérica `LogSumExp`, redes `MLP` y regularización `weight decay` en JAX puro sin depender de PyTorch.
 - **Quién debería verlo:** Equipos de ingeniería que necesitan reemplazar cadenas frágiles de reglas `if/else` por modelos aprendidos desde telemetría real, diagnosticar problemas de `overfitting` y preparar la base antes de diseñar arquitecturas modernas con Flax NNX.
-- **Serie completa:** Segunda entrega de la Serie B dentro de [JAX & OpenXLA Field Guide](https://github.com/ykro/jax-openxla-field-guide).
+- **Serie completa:** Segunda entrega de la Serie B [JAX & ML for Software Devs Field Guide](https://github.com/ykro/jax-ml-for-software-devs-field-guide).
 
 ---
 
