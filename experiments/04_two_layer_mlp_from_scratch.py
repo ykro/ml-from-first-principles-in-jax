@@ -8,10 +8,15 @@ Demonstrates for Software Engineers:
    gradients) and how He/Xavier variance scaling with `jax.random.split` solves it.
 3. A complete 2-layer MLP (`Linear -> GELU -> Linear -> LogSoftmax`) trained with
    `@jax.jit` and `jax.value_and_grad` from ~33% random accuracy to >98% accuracy.
+
+How to read the numbers: train accuracy is measured on the 1500 points used for the
+gradients; test accuracy on 1500 new points from the same rings (different key). The
+zero-init run trains the same MLP from all-zero weights to show the symmetry problem.
 """
 
 from __future__ import annotations
 
+import statistics
 import time
 from functools import partial
 from typing import Any
@@ -110,12 +115,23 @@ def train_both_models(
     return final_lin, final_mlp, lin_losses[-1], mlp_losses[-1]
 
 
+def accuracy(logits: jax.Array, labels: jax.Array) -> float:
+    return float(jnp.mean((jnp.argmax(logits, axis=-1) == labels).astype(jnp.float32)))
+
+
+def distinct_hidden_units(w1: jax.Array) -> int:
+    """How many hidden neurons have different incoming weights (columns of W1)."""
+    return int(jnp.unique(jnp.round(w1.T, 6), axis=0).shape[0])
+
+
 def run_experiment(n_per_class: int = 500, n_steps: int = 350) -> dict[str, Any]:
     """Verify linear collapse and train the 2-layer GELU MLP on concentric rings."""
     key = jax.random.key(2026)
     k_data, k_init = jax.random.split(key)
 
     features, labels = generate_concentric_rings(k_data, n_per_class=n_per_class)
+    # Held-out rings: same distribution, different key, never used for gradients
+    test_x, test_y = generate_concentric_rings(jax.random.key(4040), n_per_class=n_per_class)
     init_params = init_mlp_params(k_init, in_dim=2, hidden_dim=64, out_dim=3)
 
     # 1. Verify algebraic collapse: (X @ W1) @ W2 == X @ (W1 @ W2)
@@ -127,20 +143,25 @@ def run_experiment(n_per_class: int = 500, n_steps: int = 350) -> dict[str, Any]
     init_logits = forward_mlp(init_params, features)
     init_acc = float(jnp.mean((jnp.argmax(init_logits, axis=-1) == labels).astype(jnp.float32)))
 
-    # Warmup
+    # Warmup (the first call traces and compiles), then median of 5 timed runs
     f_lin, f_mlp, l_lin, l_mlp = train_both_models(init_params, features, labels, n_steps=n_steps)
     l_mlp.block_until_ready()
+    run_ms = []
+    for _ in range(5):
+        t0 = time.perf_counter()
+        out = train_both_models(init_params, features, labels, n_steps=n_steps)
+        jax.block_until_ready(out)
+        run_ms.append((time.perf_counter() - t0) * 1000.0)
 
-    t0 = time.perf_counter()
-    f_lin, f_mlp, l_lin, l_mlp = train_both_models(init_params, features, labels, n_steps=n_steps)
-    l_mlp.block_until_ready()
-    train_time_ms = (time.perf_counter() - t0) * 1000.0
+    lin_acc = accuracy(forward_linear_stack(f_lin, features), labels)
+    mlp_acc = accuracy(forward_mlp(f_mlp, features), labels)
+    lin_test_acc = accuracy(forward_linear_stack(f_lin, test_x), test_y)
+    mlp_test_acc = accuracy(forward_mlp(f_mlp, test_x), test_y)
 
-    lin_preds = jnp.argmax(forward_linear_stack(f_lin, features), axis=-1)
-    mlp_preds = jnp.argmax(forward_mlp(f_mlp, features), axis=-1)
-
-    lin_acc = float(jnp.mean((lin_preds == labels).astype(jnp.float32)))
-    mlp_acc = float(jnp.mean((mlp_preds == labels).astype(jnp.float32)))
+    # 2. Symmetry: the same MLP trained from all-zero weights never differentiates its neurons
+    zero_params = jax.tree.map(jnp.zeros_like, init_params)
+    _, z_mlp, _, _ = train_both_models(zero_params, features, labels, n_steps=n_steps)
+    zero_init_acc = accuracy(forward_mlp(z_mlp, features), labels)
 
     return {
         "experiment": "04_two_layer_mlp_from_scratch",
@@ -152,9 +173,15 @@ def run_experiment(n_per_class: int = 500, n_steps: int = 350) -> dict[str, Any]
         "initial_accuracy": round(init_acc * 100.0, 2),
         "linear_stack_accuracy": round(lin_acc * 100.0, 2),
         "mlp_gelu_accuracy": round(mlp_acc * 100.0, 2),
+        "linear_stack_test_accuracy": round(lin_test_acc * 100.0, 2),
+        "mlp_gelu_test_accuracy": round(mlp_test_acc * 100.0, 2),
+        "n_test": int(test_x.shape[0]),
         "linear_stack_final_loss": round(float(l_lin), 4),
         "mlp_gelu_final_loss": round(float(l_mlp), 4),
-        "train_time_ms": round(train_time_ms, 4),
+        "he_init_distinct_hidden_units": distinct_hidden_units(f_mlp["W1"]),
+        "zero_init_distinct_hidden_units": distinct_hidden_units(z_mlp["W1"]),
+        "zero_init_accuracy": round(zero_init_acc * 100.0, 2),
+        "median_train_ms": round(statistics.median(run_ms), 4),
     }
 
 
@@ -167,19 +194,31 @@ def main() -> None:
     print(f"Non-Linear Dataset          : {res['n_samples']} samples (3 concentric rings)")
     print(
         f"Linear Collapse Max Diff    : {res['linear_collapse_max_diff']:.2e} "
-        "((X@W1)@W2 == X@(W1@W2))"
+        "((X@W1)@W2 vs X@(W1@W2))"
     )
     print("-" * 74)
     print(f"Initial Random Accuracy     : {res['initial_accuracy']:.2f}%")
     print(
-        f"2-Layer Linear (No Activ.)  : {res['linear_stack_accuracy']:.2f}% "
-        f"(loss = {res['linear_stack_final_loss']:.4f})"
+        f"2-Layer Linear (No Activ.)  : train {res['linear_stack_accuracy']:.2f}% | "
+        f"test {res['linear_stack_test_accuracy']:.2f}%"
     )
     print(
-        f"2-Layer MLP (GELU, 64 hid.) : {res['mlp_gelu_accuracy']:.2f}% "
-        f"(loss = {res['mlp_gelu_final_loss']:.4f})"
+        f"2-Layer MLP (GELU, 64 hid.) : train {res['mlp_gelu_accuracy']:.2f}% | "
+        f"test {res['mlp_gelu_test_accuracy']:.2f}%"
     )
-    print(f"350 @jit Training Steps     : {res['train_time_ms']:.4f} ms")
+    print("-" * 74)
+    print(
+        f"He Init (random, scaled)    : {res['he_init_distinct_hidden_units']} of "
+        f"{res['hidden_dim']} hidden units distinct"
+    )
+    print(
+        f"Zero Init (all W = 0)       : {res['zero_init_distinct_hidden_units']} of "
+        f"{res['hidden_dim']} distinct | train {res['zero_init_accuracy']:.2f}%"
+    )
+    print(
+        f"Median @jit + lax.scan Train: {res['median_train_ms']:.4f} ms "
+        f"(2 nets x {res['n_steps']} steps)"
+    )
 
 
 if __name__ == "__main__":

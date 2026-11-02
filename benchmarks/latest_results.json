@@ -3,6 +3,19 @@
     "python_version": "3.12.11",
     "platform": "macOS-26.6.2-arm64-arm-64bit",
     "processor": "arm",
+    "cpu_model": "Apple M1 Max",
+    "cpu_count": 10,
+    "load_average_before": [
+      24.85,
+      24.31,
+      23.28
+    ],
+    "load_average_after": [
+      21.51,
+      23.57,
+      23.04
+    ],
+    "timing": "median ms after a warmup; varies run to run",
     "jax_version": "0.12.0.1",
     "numpy_version": "2.5.4",
     "jax_backend": "cpu",
@@ -33,27 +46,83 @@
       "true_b": 8.5,
       "learned_b": 9.001,
       "max_weight_error": 0.1513,
-      "train_time_ms": 7.701
+      "closed_form_mse": 0.3754,
+      "closed_form_w": [
+        34.495,
+        -4.171,
+        19.842,
+        11.38
+      ],
+      "closed_form_b": 8.456,
+      "learned_vs_closed_form_ratio": 1.052,
+      "noise_floor_mse": 0.3764,
+      "median_step_ms": 0.0523,
+      "timed_steps": 250
     },
     "02_gradient_descent_geometry": {
       "experiment": "02_gradient_descent_geometry",
       "backend": "cpu",
       "n_steps": 180,
       "initial_loss": 454.0179,
+      "hessian_condition_number": 2741.8,
+      "learning_rates": {
+        "sgd": 0.025,
+        "momentum": 0.025,
+        "adam": 0.35
+      },
       "sgd_final_loss": 8.564543,
       "momentum_final_loss": 0.45256,
       "adam_final_loss": 1e-06,
-      "sgd_steps_to_0_05": 180,
-      "momentum_steps_to_0_05": 180,
+      "sgd_steps_to_0_05": null,
+      "momentum_steps_to_0_05": null,
       "adam_steps_to_0_05": 79,
-      "eager_loop_ms": 2611.6963,
-      "compiled_scan_ms": 3.4312,
-      "speedup": 761.17
+      "lr_sweep": {
+        "sgd": {
+          "best_lr": 0.0251,
+          "final_loss": 8.536668,
+          "steps_to_0_05": null
+        },
+        "momentum": {
+          "best_lr": 0.0501,
+          "final_loss": 0.036971,
+          "steps_to_0_05": 171
+        },
+        "adam": {
+          "best_lr": 0.7943,
+          "final_loss": 0.0,
+          "steps_to_0_05": 69
+        }
+      },
+      "eager_loop_ms": 1426.9655,
+      "jit_step_loop_ms": 5.1877,
+      "compiled_scan_ms": 2.4253,
+      "speedup_vs_eager": 588.37,
+      "speedup_vs_jit_step_loop": 2.14,
+      "timing_repeats": {
+        "eager": 3,
+        "jit_step_loop": 15,
+        "scan": 30
+      }
     },
     "03_logistic_classification_cross_entropy": {
       "experiment": "03_logistic_classification_cross_entropy",
       "backend": "cpu",
       "n_samples": 1800,
+      "extreme_logits": [
+        10.0,
+        20.0,
+        120.0
+      ],
+      "naive_softmax_output": [
+        "0.0",
+        "0.0",
+        "nan"
+      ],
+      "stable_log_softmax_output": [
+        -110.0,
+        -100.0,
+        0.0
+      ],
       "naive_overflow_nan": true,
       "stable_logsumexp_finite": true,
       "max_diff_vs_jax_nn": 0.0,
@@ -61,7 +130,10 @@
       "final_loss": 0.0113,
       "initial_accuracy": 33.33,
       "final_accuracy": 99.94,
-      "train_time_ms": 12.406
+      "n_test": 900,
+      "test_accuracy": 100.0,
+      "n_steps": 200,
+      "median_step_ms": 0.1779
     },
     "04_two_layer_mlp_from_scratch": {
       "experiment": "04_two_layer_mlp_from_scratch",
@@ -73,25 +145,40 @@
       "initial_accuracy": 33.6,
       "linear_stack_accuracy": 32.53,
       "mlp_gelu_accuracy": 99.47,
+      "linear_stack_test_accuracy": 30.6,
+      "mlp_gelu_test_accuracy": 99.07,
+      "n_test": 1500,
       "linear_stack_final_loss": 1.116,
       "mlp_gelu_final_loss": 0.0906,
-      "train_time_ms": 101.3096
+      "he_init_distinct_hidden_units": 64,
+      "zero_init_distinct_hidden_units": 1,
+      "zero_init_accuracy": 33.33,
+      "median_train_ms": 258.8036
     },
     "05_overfitting_and_weight_decay": {
       "experiment": "05_overfitting_and_weight_decay",
       "backend": "cpu",
       "n_train": 32,
       "n_val": 256,
+      "n_test": 1024,
       "n_features": 28,
       "overfit_train_mse": 0.29,
       "overfit_val_mse": 9.9728,
       "overfit_val_to_train_ratio": 34.39,
       "overfit_weight_norm": 3.43,
-      "regularized_train_mse": 0.6584,
+      "regularized_train_mse": 2.7273,
       "regularized_val_mse": 2.2289,
       "regularized_weight_norm": 0.7,
       "val_mse_reduction_ratio": 4.47,
-      "elapsed_ms": 108.7588
+      "test_mse": {
+        "unregularized_final": 9.981,
+        "weight_decay_only_final": 2.7368,
+        "val_gate_only_best": 2.9292,
+        "weight_decay_plus_gate_best": 2.9337
+      },
+      "test_noise_floor_mse": 0.0103,
+      "test_mse_reduction_ratio": 3.4,
+      "median_800_step_scan_ms": 2.9087
     }
   },
   "all_verifications_passed": true

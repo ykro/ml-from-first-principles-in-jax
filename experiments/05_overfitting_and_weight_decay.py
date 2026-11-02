@@ -8,17 +8,45 @@ Demonstrates for Software Engineers:
    driving `train_mse` near zero while `val_mse` explodes (`overfitting`).
 3. How combining a strict `Train/Val Split`, `L2 Weight Decay` (`0.5 * wd * sum(W^2)`),
    and a `Validation Gate` (early stopping on validation loss) suppresses spurious
-   weights and reduces validation error by more than 5x.
+   weights and reduces validation error.
+
+How to read the numbers: the Validation Gate picks its checkpoint by looking at the
+validation set, so the validation MSE of that checkpoint is optimistic. The honest number
+is the MSE on a separate test set (1024 incidents, different key) that no decision used.
+The ablation trains weight decay alone and the gate alone to show what each one buys.
+Validation and test targets carry noise 0.10 (train: 1.15), so their MSE floor is ~0.01
+and their MSE mostly measures how far the learned weights are from the true ones.
 """
 
 from __future__ import annotations
 
+import statistics
 import time
 from functools import partial
 from typing import Any
 
 import jax
 import jax.numpy as jnp
+
+
+def true_incident_weights(n_features: int = 28) -> tuple[jax.Array, jax.Array]:
+    """Only the first 4 metrics are causal; the other 24 have true weight 0."""
+    true_w = jnp.zeros((n_features,), dtype=jnp.float32)
+    true_w = true_w.at[:4].set(jnp.array([1.2, -0.9, 0.8, -0.7], dtype=jnp.float32))
+    return true_w, jnp.array(0.5, dtype=jnp.float32)
+
+
+def generate_test_incidents(
+    key: jax.Array,
+    n_test: int = 1024,
+    n_features: int = 28,
+) -> tuple[jax.Array, jax.Array]:
+    """Held-out test incidents (same distribution and noise as validation)."""
+    k_x, k_n = jax.random.split(key)
+    x_test = jax.random.normal(k_x, (n_test, n_features), dtype=jnp.float32)
+    true_w, true_b = true_incident_weights(n_features)
+    y_test = x_test @ true_w + true_b + 0.10 * jax.random.normal(k_n, (n_test,), dtype=jnp.float32)
+    return x_test, y_test
 
 
 def generate_high_dim_incident_dataset(
@@ -36,9 +64,7 @@ def generate_high_dim_incident_dataset(
     x_train = jax.random.normal(k_xtr, (n_train, n_features), dtype=jnp.float32)
     x_val = jax.random.normal(k_xval, (n_val, n_features), dtype=jnp.float32)
 
-    true_w = jnp.zeros((n_features,), dtype=jnp.float32)
-    true_w = true_w.at[:4].set(jnp.array([1.2, -0.9, 0.8, -0.7], dtype=jnp.float32))
-    true_b = jnp.array(0.5, dtype=jnp.float32)
+    true_w, true_b = true_incident_weights(n_features)
 
     y_train = (
         x_train @ true_w
@@ -128,6 +154,8 @@ def run_training_regime(
         "best_val_mse": best_val_mse,
         "final_weight_l2_norm": jnp.linalg.norm(final_params["w"]),
         "best_weight_l2_norm": jnp.linalg.norm(best_params["w"]),
+        "final_params": final_params,
+        "best_params": best_params,
     }
 
 
@@ -135,6 +163,7 @@ def run_experiment() -> dict[str, Any]:
     """Compare unregularized overfitting against L2 Weight Decay + Validation Gate."""
     key = jax.random.key(99)
     x_train, y_train, x_val, y_val = generate_high_dim_incident_dataset(key)
+    x_test, y_test = generate_test_incidents(jax.random.key(2027))
     n_features = x_train.shape[1]
 
     init_params = {
@@ -142,32 +171,50 @@ def run_experiment() -> dict[str, Any]:
         "b": jnp.array(0.0, dtype=jnp.float32),
     }
 
-    # Warmup
-    _ = run_training_regime(init_params, x_train, y_train, x_val, y_val, weight_decay=0.0)
+    def train(weight_decay: float) -> dict[str, jax.Array]:
+        return run_training_regime(
+            init_params, x_train, y_train, x_val, y_val, weight_decay=weight_decay, n_steps=800
+        )
 
-    t0 = time.perf_counter()
-    overfit = run_training_regime(
-        init_params, x_train, y_train, x_val, y_val, weight_decay=0.0, n_steps=800
-    )
-    reg = run_training_regime(
-        init_params, x_train, y_train, x_val, y_val, weight_decay=0.35, n_steps=800
-    )
-    reg["best_val_mse"].block_until_ready()
-    elapsed_ms = (time.perf_counter() - t0) * 1000.0
+    # Warmup (traces and compiles once; weight_decay is a traced argument)
+    jax.block_until_ready(train(0.0))
+    run_ms = []
+    for _ in range(5):
+        t0 = time.perf_counter()
+        jax.block_until_ready(train(0.0))
+        run_ms.append((time.perf_counter() - t0) * 1000.0)
+
+    overfit = train(0.0)
+    reg = train(0.35)
+
+    def test_mse(params: dict[str, jax.Array]) -> float:
+        return float(mse_eval(params, x_test, y_test))
 
     overfit_train = float(overfit["final_train_mse"])
     overfit_val = float(overfit["final_val_mse"])
     overfit_gap = overfit_val / max(overfit_train, 1e-6)
 
-    reg_train = float(reg["final_train_mse"])
+    # The gated model IS the best-validation checkpoint: report train MSE of that checkpoint
+    reg_train = float(mse_eval(reg["best_params"], x_train, y_train))
     reg_val = float(reg["best_val_mse"])
     val_mse_reduction = overfit_val / reg_val
+
+    # Honest numbers on the untouched test set, plus the ablation of each ingredient
+    test = {
+        "unregularized_final": test_mse(overfit["final_params"]),
+        "weight_decay_only_final": test_mse(reg["final_params"]),
+        "val_gate_only_best": test_mse(overfit["best_params"]),
+        "weight_decay_plus_gate_best": test_mse(reg["best_params"]),
+    }
+    true_w, true_b = true_incident_weights(n_features)
+    test_noise_floor = test_mse({"w": true_w, "b": true_b})
 
     return {
         "experiment": "05_overfitting_and_weight_decay",
         "backend": jax.default_backend(),
         "n_train": int(x_train.shape[0]),
         "n_val": int(x_val.shape[0]),
+        "n_test": int(x_test.shape[0]),
         "n_features": n_features,
         "overfit_train_mse": round(overfit_train, 4),
         "overfit_val_mse": round(overfit_val, 4),
@@ -177,32 +224,47 @@ def run_experiment() -> dict[str, Any]:
         "regularized_val_mse": round(reg_val, 4),
         "regularized_weight_norm": round(float(reg["best_weight_l2_norm"]), 2),
         "val_mse_reduction_ratio": round(val_mse_reduction, 2),
-        "elapsed_ms": round(elapsed_ms, 4),
+        "test_mse": {k: round(v, 4) for k, v in test.items()},
+        "test_noise_floor_mse": round(test_noise_floor, 4),
+        "test_mse_reduction_ratio": round(
+            test["unregularized_final"] / test["weight_decay_plus_gate_best"], 2
+        ),
+        "median_800_step_scan_ms": round(statistics.median(run_ms), 4),
     }
 
 
 def main() -> None:
     res = run_experiment()
+    t = res["test_mse"]
     print("=" * 74)
     print("Experiment 05: Overfitting, Train/Val Split & L2 Weight Decay")
     print("=" * 74)
     print(f"Backend Device              : {res['backend']}")
     print(
-        f"Dataset Split               : {res['n_train']} train | "
-        f"{res['n_val']} val | {res['n_features']} features (4 causal, 24 noisy)"
+        f"Dataset Split               : {res['n_train']} train | {res['n_val']} val | "
+        f"{res['n_test']} test"
     )
+    print(f"Features                    : {res['n_features']} (4 causal, 24 noisy)")
     print("-" * 74)
     print(
-        f"Unregularized (wd=0.0)      : train MSE = {res['overfit_train_mse']:.4f} | "
-        f"val MSE = {res['overfit_val_mse']:.4f} (||w||2 = {res['overfit_weight_norm']:.2f})"
+        f"Unregularized (wd=0.0)      : train {res['overfit_train_mse']:.4f} | "
+        f"val {res['overfit_val_mse']:.4f} | ||w|| {res['overfit_weight_norm']:.2f}"
     )
     print(
-        f"L2 Weight Decay + Val Gate  : train MSE = {res['regularized_train_mse']:.4f} | "
-        f"val MSE = {res['regularized_val_mse']:.4f} "
-        f"(||w||2 = {res['regularized_weight_norm']:.2f})"
+        f"WD 0.35 + Val Gate          : train {res['regularized_train_mse']:.4f} | "
+        f"val {res['regularized_val_mse']:.4f} | ||w|| {res['regularized_weight_norm']:.2f}"
     )
-    print(f"Validation Error Reduction  : {res['val_mse_reduction_ratio']:.2f}x lower val MSE")
-    print(f"Both 800-Step Scans Time    : {res['elapsed_ms']:.4f} ms")
+    print(f"Val/Train Gap (wd=0.0)      : {res['overfit_val_to_train_ratio']:.2f}x")
+    print(f"Val MSE Reduction           : {res['val_mse_reduction_ratio']:.2f}x (gate saw val)")
+    print("-" * 74)
+    print("Test MSE (never used for any decision):")
+    print(f"  Unregularized, final step : {t['unregularized_final']:.4f}")
+    print(f"  Weight decay only, final  : {t['weight_decay_only_final']:.4f}")
+    print(f"  Val gate only (wd=0.0)    : {t['val_gate_only_best']:.4f}")
+    print(f"  Weight decay + val gate   : {t['weight_decay_plus_gate_best']:.4f}")
+    print(f"  Noise floor (true w, b)   : {res['test_noise_floor_mse']:.4f}")
+    print(f"Test MSE Reduction          : {res['test_mse_reduction_ratio']:.2f}x")
+    print(f"Median 800-Step @jit Scan   : {res['median_800_step_scan_ms']:.4f} ms")
 
 
 if __name__ == "__main__":

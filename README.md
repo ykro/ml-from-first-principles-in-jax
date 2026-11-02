@@ -17,7 +17,7 @@ En ingeniería de software tradicional escribimos reglas fijas (`if cpu > 0.75: 
 
 ### 2. Dataflow Forward y Backward de una Red Neuronal (`MLP` de 2 Capas)
 
-Apilar dos multiplicaciones de matrices sin una activación intermedia colapsa algebraicamente en una sola transformación lineal `(X @ W1) @ W2 == X @ (W1 @ W2)`. Al intercalar una no-linealidad como `jax.nn.gelu` y calcular la pérdida con el truco numérico `LogSumExp`, una red neuronal de 2 capas en 80 líneas de JAX deforma el espacio de representación y resuelve fronteras de decisión curvas con `99.47%` de exactitud.
+Apilar dos multiplicaciones de matrices sin una activación intermedia colapsa algebraicamente en una sola transformación lineal `(X @ W1) @ W2 == X @ (W1 @ W2)`. Al intercalar una no-linealidad como `jax.nn.gelu` y calcular la pérdida con el truco numérico `LogSumExp`, una red neuronal de 2 capas en 80 líneas de JAX deforma el espacio de representación y resuelve fronteras de decisión curvas con `99.47%` de exactitud en entrenamiento y `99.07%` en un conjunto de test que nunca vio.
 
 ![Dataflow forward y backward de un MLP de dos capas en JAX](diagrams/02-mlp-forward-backward-dataflow.svg)
 
@@ -31,32 +31,52 @@ Evaluar un modelo sobre el mismo conjunto de datos con el que se calculan los gr
 
 ## Resultados Reales de Verificación (`verify_ml_principles.py`)
 
-Benchmarks deterministas ejecutados con Python `3.12.11`, JAX `0.12.0.1` y NumPy `2.5.4`:
+Una corrida de `make all` en CPU (`Apple M1 Max`, 10 núcleos, load average de 1 minuto `24.85` al empezar), Python `3.12.11`, JAX `0.12.0.1` y NumPy `2.5.4`. Las cifras de esta tabla son las de `benchmarks/latest_results.json`.
 
-| Experimento | Archivo | Baseline / Enfoque Ingenuo | Modelo Aprendido en JAX | Mejora / Verificación |
-| :--- | :--- | :--- | :--- | :--- |
-| **01. Reglas vs Pesos Aprendidos (`MSE`)** | `experiments/01_rules_vs_learned_weights.py` | `531.3102 ms²` (Heurística `if/else`) | `0.3949 ms²` (Regresión Lineal `@jit`) | **1345.28x menor error** (recupera `w` con error máx `0.1513`) |
-| **02. Geometría `SGD` vs `Momentum` vs `Adam`** | `experiments/02_gradient_descent_geometry.py` | `SGD` `8.5645` (`180` steps) / `Momentum` `0.4526` | `Adam` `0.000001` (`79` steps a `<0.05`) | **761.17x speedup** (`@jit` + `lax.scan` vs eager `loop`) |
-| **03. `LogSumExp` y Clasificación Multiclase** | `experiments/03_logistic_classification_cross_entropy.py` | `33.33%` (`exp(120)` desborda a `NaN`) | `99.94%` exactitud (`LogSumExp` finito) | **PASS** (`max_diff = 0.0` vs `jax.nn.log_softmax`) |
-| **04. `MLP` de 2 Capas vs Colapso Lineal** | `experiments/04_two_layer_mlp_from_scratch.py` | `32.53%` (2 capas lineales sin activación) | `99.47%` (`MLP` con `GELU`, 64 neuronas) | **PASS** (colapso lineal verificado `Δ = 1.43e-06`) |
-| **05. `Overfitting` vs `L2 Weight Decay`** | `experiments/05_overfitting_and_weight_decay.py` | `9.9728` Val MSE (`wd=0.0`, brecha `34.39x`) | `2.2289` Val MSE (`wd=0.35` + `Val Gate`) | **4.47x menor Val MSE** (`\|\|w\|\|₂` baja de `3.43` a `0.70`) |
+| Experimento | Baseline ingenuo | Resultado en JAX | Referencia justa |
+| :--- | :--- | :--- | :--- |
+| **01. Reglas vs pesos aprendidos (`MSE`)** | Regla `if/else` con coeficientes adivinados, `531.3102 ms²` | `0.3949 ms²` tras 250 pasos de gradient descent (**1345.28x menos error que la regla**) | Mínimos cuadrados en forma cerrada `0.3754 ms²` (el mejor ajuste lineal posible); piso de ruido `0.3764 ms²`. El modelo aprendido queda `5.2%` arriba del óptimo |
+| **02. `SGD` vs `Momentum` vs `Adam`** | `SGD` termina en `8.5645`, `Momentum` en `0.4526` (ninguno baja de `0.05` en 180 pasos) | `Adam` cruza `0.05` en el paso `79` | Cada optimizador con su mejor learning rate de la misma rejilla: `SGD` no llega, `Momentum` paso 171, `Adam` paso 69 |
+| **02. Tiempo del mismo trabajo** (3 optimizadores × 180 pasos) | Loop eager op por op: `1426.97 ms` | `@jit` + `lax.scan`: `2.43 ms` (**588.37x**) | Loop de Python sobre un paso con `@jit`: `5.19 ms`, el scan es **2.14x** más rápido |
+| **03. `LogSumExp` y clasificación** | `softmax` ingenuo con un logit de 120 devuelve `[0.0, 0.0, nan]` | `log_softmax` estable `[-110.0, -100.0, 0.0]`, diferencia `0.0e+00` contra `jax.nn.log_softmax` | Accuracy `33.33%` con pesos en cero → `99.94%` en entrenamiento y `100.00%` en test (900 muestras nuevas) |
+| **04. `MLP` de 2 capas vs colapso lineal** | 2 capas sin activación: `32.53%` train / `30.60%` test (`Δ = 1.43e-06` contra una sola matriz) | `MLP` con `GELU`: `99.47%` train / `99.07%` test | Con todos los pesos en cero, `1` de `64` neuronas distintas y `33.33%`; con init de He, `64` de `64` |
+| **05. `Overfitting` vs `weight decay` + validation gate** | Sin regularizar: train `0.2900`, val `9.9728` (brecha `34.39x`) | `wd=0.35` + gate: val `2.2289` (**4.47x** menos, con el gate eligiendo sobre val) | Test que ninguna decisión tocó: `9.9810` → `2.9337` (**3.40x**); `weight decay` solo `2.7368`, gate solo `2.9292` |
 
-Salida íntegra de terminal generada por `verify_ml_principles.py`:
+### Cómo leer estas cifras
+
+- **Las métricas de calidad son deterministas.** MSE, pérdidas, accuracy y normas salen de datos sintéticos con semillas fijas y se repiten igual en cada corrida en CPU. Los datos vienen de fórmulas conocidas a propósito, para comprobar si el modelo encuentra la respuesta correcta.
+- **Los tiempos no son deterministas.** Cada tiempo es la mediana después de una llamada de calentamiento (`block_until_ready()` en todas las ramas de JAX) y cambia entre corridas, sobre todo con la máquina cargada. Cada script imprime su propia medición, así que sus tiempos no coinciden con los de esta tabla. Importa el orden de magnitud.
+- **Cada «Nx» dice contra qué compara.** El `1345.28x` del 01 mide lo mala que era la regla adivinada; la comparación justa es contra mínimos cuadrados. El `588.37x` del 02 compara contra Python despachando cada operación una por una; contra un loop que ya llama a un paso compilado, `lax.scan` gana `2.14x`. Ninguna corrida extrapola: los tres caminos ejecutan los 180 pasos completos.
+- **El 02 compara optimizadores con learning rates elegidos a mano** y también con el mejor learning rate de cada uno en la misma rejilla de 33 valores. `Adam` gana en los dos casos porque cada eje de este problema tiene su propia escala (número de condición del Hessiano `2741.8`), justo lo que `Adam` corrige.
+- **Train contra test.** La accuracy de entrenamiento se mide sobre los datos que generaron los gradientes. Los experimentos 03 y 04 también reportan un conjunto de test generado con otra semilla.
+- **El validation gate mira la validación.** En el 05 el checkpoint se elige por su error de validación, así que ese número es optimista (`2.2289` en val contra `2.9337` en test). La cifra honesta es la de test, y ahí el `weight decay` solo (`2.7368`) rinde mejor que combinado con el gate. Los targets de validación y test tienen ruido `0.10` (los de entrenamiento `1.15`), así que su piso de error es `0.0103` y su MSE mide sobre todo qué tan lejos quedaron los pesos de los reales.
+
+Salida íntegra de terminal generada por `verify_ml_principles.py` en esa corrida:
 
 ```text
-==============================================================================
+============================================================================================
 THE OUTSIDE JUDGE — ML from First Principles in JAX Verification Report
-==============================================================================
+============================================================================================
 Runtime : Python 3.12.11 | JAX 0.12.0.1 | NumPy 2.5.4 | Backend: cpu
-------------------------------------------------------------------------------
-Experiment                         | Baseline / Naive | Learned / JAX ML | Gain / Check
-------------------------------------------------------------------------------
-01. Rules vs Learned Linear MSE    | 531.3102 MSE     | 0.3949 MSE       | 1345.28x lower
-02. SGD vs Momentum vs Adam        | SGD 180 steps    | Adam 79 steps    | 761.17x @jit
-03. LogSumExp & Cross-Entropy      | 33.33% (NaN exp) | 99.94% (Finite)  | PASS (<1e-7)
-04. 2-Layer MLP vs Linear Stack    | 32.53% (Linear)  | 99.47% (GELU MLP) | PASS (>97%) 
-05. Overfitting vs Weight Decay    | 9.9728 Val MSE   | 2.2289 Val MSE   | 4.47x lower 
-------------------------------------------------------------------------------
+CPU     : Apple M1 Max (10 cores) | 1-min load average 24.85 before, 21.51 after
+--------------------------------------------------------------------------------------------
+Experiment                     | Baseline           | JAX ML           | Result
+--------------------------------------------------------------------------------------------
+01. Rules vs learned (MSE)     | rules 531.3102     | learned 0.3949   | 1345.28x lower
+    fair: closed-form least squares 0.3754 (learned is 5.2% above it)
+02. Optimizers, 180 steps      | SGD 8.5645         | Adam 0.000001    | <0.05 at step 79
+    fair: best lr each -> SGD never, Momentum step 171, Adam step 69
+02. Same work, timing          | eager 1426.97 ms   | scan 2.43 ms     | 588.37x
+    fair: Python loop of @jit step 5.19 ms -> scan 2.14x faster
+03. LogSumExp + cross-entropy  | naive: nan         | stable: finite   | diff 0.0e+00
+    accuracy 33.33% -> train 99.94%, held-out test 100.00%
+04. MLP vs linear stack        | linear 32.53%      | MLP 99.47%       | train acc
+    held-out test: linear 30.60%, MLP 99.07%; zero init: 1 of 64 units distinct
+05. Overfit vs WD + val gate   | val 9.9728         | val 2.2289       | 4.47x lower
+    fair (test set): 9.9810 -> 2.9337, 3.40x lower; WD alone 2.7368
+--------------------------------------------------------------------------------------------
+Quality metrics are deterministic (fixed seeds). Times are medians after a warmup
+and vary run to run.
 Saved JSON report to: benchmarks/latest_results.json
 ALL DETERMINISTIC CHECKS PASSED.
 ```
@@ -106,13 +126,13 @@ pip install -e ".[dev]"
 
 ### 2. Recorrido guiado por los 5 experimentos (Orden recomendado)
 
-Cada script está diseñado como una lección autocontenida que se ejecuta en menos de un segundo en CPU:
+Cada script está diseñado como una lección autocontenida que corre en unos segundos en CPU (el 02 tarda más porque mide el loop eager completo):
 
 ```bash
 # Paso 1 — De heurísticas if/else escritas a mano a pesos aprendidos con MSE y value_and_grad
 python experiments/01_rules_vs_learned_weights.py
 
-# Paso 2 — Geometría de optimización: SGD vs Momentum vs Adam implementados con jax.tree.map
+# Paso 2 — Geometría de optimización: SGD vs Momentum vs Adam con jax.tree.map, barrido de learning rate y tres formas de correr el loop
 python experiments/02_gradient_descent_geometry.py
 
 # Paso 3 — De números a probabilidades: por qué exp() falla en float32 y cómo funciona LogSumExp

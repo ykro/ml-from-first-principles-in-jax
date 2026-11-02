@@ -39,7 +39,7 @@
     <div class="diagram-container" role="region" aria-label="Before, changes, and after architecture comparison; scroll horizontally on narrow screens" tabindex="0">
       <svg viewBox="0 0 1200 660" xmlns="http://www.w3.org/2000/svg" data-diagram="architecture-delta" role="img" aria-labelledby="overfit-vs-reg-title overfit-vs-reg-desc">
         <title id="overfit-vs-reg-title">Unregularized overfitting vs L2 weight decay and validation checkpoint gate</title>
-        <desc id="overfit-vs-reg-desc">Architecture delta comparing an unregularized training pipeline that memorizes noisy features (Val MSE 9.97) against a regularized pipeline with L2 Weight Decay and a Validation Gate reducing validation error 4.47x (Val MSE 2.23).</desc>
+        <desc id="overfit-vs-reg-desc">Architecture delta comparing an unregularized training pipeline that memorizes noisy features (Val MSE 9.97) against a regularized pipeline with L2 Weight Decay and a Validation Gate reducing validation error 4.47x (Val MSE 2.23) and held-out test error 3.40x (Test MSE 9.98 to 2.93).</desc>
         <defs>
           <marker id="overfit-vs-reg-arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto" markerUnits="userSpaceOnUse"><polygon points="0 0, 8 3, 0 6" fill="#3B5B8C"/></marker>
         </defs>
@@ -49,7 +49,7 @@
         <text x="424" y="28" fill="#0F2547" font-size="14" font-family="'Geist', sans-serif" font-weight="600">Changes Ledger</text>
         <text x="424" y="50" fill="#3B5B8C" font-size="10" font-family="'Geist', sans-serif">Penalize spurious weight norm and gate checkpoints on unseen data</text>
         <text x="840" y="28" fill="#0F2547" font-size="14" font-family="'Geist', sans-serif" font-weight="600">After · L2 Weight Decay + Val Gate</text>
-        <text x="840" y="50" fill="#3B5B8C" font-size="10" font-family="'Geist', sans-serif">||w||2 shrunk 3.43 → 0.70 · Val MSE = 2.23 (4.47x lower)</text>
+        <text x="840" y="50" fill="#3B5B8C" font-size="10" font-family="'Geist', sans-serif">||w||2 3.43 → 0.70 · Val MSE 2.23 (4.47x) · Test MSE 2.93 (3.40x)</text>
         <path d="M 392 8 V 568 M 808 8 V 568" stroke="rgba(15,37,71,0.14)" stroke-width="1"/>
 
         <g data-snapshot="before" transform="translate(24 88)" data-grid="336 480 4">
@@ -119,7 +119,7 @@
         <path d="M 456 262 H 776" stroke="rgba(15,37,71,0.14)" stroke-width="0.8"/>
 
         <text x="424" y="286" fill="#3B5B8C" font-size="9" font-family="'Geist Mono', monospace">04</text>
-        <text x="456" y="284" data-change="CHANGED" data-target="weights" fill="#3B5B8C" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.06em">CHANGED · weights<tspan x="456" y="306" fill="#0F2547" font-size="11.5" font-family="'Geist', sans-serif" letter-spacing="0">Shrink ||w||2 to 0.70 and cut Val MSE 4.47x</tspan></text>
+        <text x="456" y="284" data-change="CHANGED" data-target="weights" fill="#3B5B8C" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.06em">CHANGED · weights<tspan x="456" y="306" fill="#0F2547" font-size="11.5" font-family="'Geist', sans-serif" letter-spacing="0">Shrink ||w||2 to 0.70; Test MSE 3.40x lower</tspan></text>
         <path d="M 456 322 H 776" stroke="rgba(15,37,71,0.14)" stroke-width="0.8"/>
 
         <text x="424" y="346" fill="#3B5B8C" font-size="9" font-family="'Geist Mono', monospace">05</text>
@@ -179,14 +179,14 @@
             <path d="M 85 316 V 356" fill="none" stroke="#3B5B8C" stroke-width="3"/>
             <text x="96" y="320" fill="#3B5B8C" font-size="7.5" font-family="'Geist Mono', monospace">~ weights · CHANGED</text>
             <text x="96" y="340" fill="#0F2547" font-size="12" font-family="'Geist', sans-serif" font-weight="600">Selected Weights</text>
-            <text x="96" y="356" fill="#3B5B8C" font-size="9" font-family="'Geist Mono', monospace">||w||2 = 0.70 · 4.47x</text>
+            <text x="96" y="356" fill="#3B5B8C" font-size="9" font-family="'Geist Mono', monospace">||w||2 = 0.70 · val 4.47x</text>
           </g>
 
           <g data-kind="component" data-object-id="generalize" data-status="unchanged" data-signature="eval:unseen-val:v1">
             <rect data-role="bounds" x="84" y="416" width="168" height="64" rx="6" fill="#EFECE6" stroke="#3B5B8C" stroke-width="1.2"/>
             <text x="96" y="432" fill="#3B5B8C" font-size="7.5" font-family="'Geist Mono', monospace">= generalize · UNCHANGED</text>
             <text x="96" y="452" fill="#0F2547" font-size="12" font-family="'Geist', sans-serif" font-weight="600">Unseen Validation</text>
-            <text x="96" y="468" fill="#3B5B8C" font-size="9" font-family="'Geist Mono', monospace">256 holdout samples</text>
+            <text x="96" y="468" fill="#3B5B8C" font-size="9" font-family="'Geist Mono', monospace">256 val · 1024 test</text>
           </g>
         </g>
 
