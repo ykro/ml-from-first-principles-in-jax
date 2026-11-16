@@ -1,6 +1,6 @@
 """The Outside Judge: Deterministic ML First-Principles Verification & Benchmark Runner.
 
-Executes all 5 Machine Learning from First Principles experiments in JAX,
+Executes all 5 ML from the Basics experiments in JAX,
 enforces deterministic mathematical and convergence assertions, and writes
 `benchmarks/latest_results.json` and `benchmarks/terminal_output.txt`.
 
@@ -248,7 +248,7 @@ def main() -> None:
     width = 92
     lines = [
         "=" * width,
-        "THE OUTSIDE JUDGE — ML from First Principles in JAX Verification Report",
+        "THE OUTSIDE JUDGE — ML from the Basics in JAX Verification Report",
         "=" * width,
         (
             f"Runtime : Python {env['python_version']} | JAX {env['jax_version']} | "

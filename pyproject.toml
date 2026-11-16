@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "ml-from-first-principles-in-jax"
 version = "0.1.0"
-description = "Machine Learning from First Principles in JAX for Software Devs: From Hardcoded Rules to a Two-Layer MLP in 100 Lines"
+description = "ML from the Basics in JAX for Software Devs: From Hardcoded Rules to a Two-Layer MLP in 100 Lines"
 readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"

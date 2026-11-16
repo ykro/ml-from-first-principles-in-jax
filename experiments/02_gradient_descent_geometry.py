@@ -75,7 +75,7 @@ def adam_step(
     beta2: float = 0.999,
     eps: float = 1e-8,
 ) -> tuple[dict[str, jax.Array], dict[str, jax.Array], dict[str, jax.Array]]:
-    """Adam optimizer step from first principles using jax.tree.map."""
+    """Adam optimizer step written from scratch using jax.tree.map."""
     new_m = jax.tree.map(lambda m_i, g_i: beta1 * m_i + (1.0 - beta1) * g_i, m, grads)
     new_v = jax.tree.map(lambda v_i, g_i: beta2 * v_i + (1.0 - beta2) * jnp.square(g_i), v, grads)
     m_hat = jax.tree.map(lambda m_i: m_i / (1.0 - jnp.power(beta1, t)), new_m)

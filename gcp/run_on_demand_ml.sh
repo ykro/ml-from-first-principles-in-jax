@@ -31,7 +31,7 @@ cleanup() {
 trap cleanup EXIT INT TERM
 
 echo "============================================================"
-echo " ML from First Principles in JAX — On-Demand GCP Runner"
+echo " ML from the Basics in JAX — On-Demand GCP Runner"
 echo " Project : ${PROJECT_ID}"
 echo " Mode    : ${MODE}"
 echo "============================================================"
