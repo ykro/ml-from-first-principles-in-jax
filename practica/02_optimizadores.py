@@ -27,4 +27,4 @@ for opt, s in [(sgd, None), (momentum, cero), (adam, (cero, cero, 0))]:
     w = jnp.array([1.0, 1.0])
     for _ in range(100):
         w, s = opt(w, s, jax.grad(error)(w))
-    print(f"{opt.__name__:9s} error {error(w):.5f}  w = {w}")
+    print(f"{opt.__name__:9s} error {error(w):.5f}  w = [{w[0]:.4f} {w[1]:.4f}]")
