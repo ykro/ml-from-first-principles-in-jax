@@ -102,8 +102,10 @@ ALL DETERMINISTIC CHECKS PASSED.
 │   └── 05_overfitting_and_weight_decay.py               # Overfitting en 28 métricas ruidosas vs L2 Weight Decay
 ├── gcp/
 │   └── run_on_demand_ml.sh                              # Runner on-demand con auto-teardown en Cloud TPU v5e y L4 GPU
+├── practica/                                            # Fragmentos que se escriben en el video de práctica
 ├── tests/
-│   └── test_ml_principles.py                            # Suite pytest determinista (5 tests)
+│   ├── test_ml_principles.py                            # Suite pytest determinista de los experimentos (5 tests)
+│   └── test_practica.py                                 # Un test por fragmento de practica/ (6 tests)
 ├── Makefile
 ├── pyproject.toml
 └── verify_ml_principles.py                              # El Outside Judge (aserciones de convergencia y generalización)
@@ -124,7 +126,20 @@ pip install --upgrade pip
 pip install -e ".[dev]"
 ```
 
-### 2. Recorrido guiado por los 5 experimentos (Orden recomendado)
+### 2. Práctica a mano (los fragmentos del video de práctica)
+
+La carpeta `practica/` tiene los fragmentos cortos que se escriben en el video de práctica. `03_softmax_roto.py` imprime un `nan` a propósito: el error es parte del ejercicio. Escríbelos tú antes de abrirlos.
+
+```bash
+python practica/01_ajustar.py         # pérdida MSE, value_and_grad y un paso compilado: aprende la fórmula oculta
+python practica/02_optimizadores.py   # SGD, Momentum y Adam en un cañón, cada uno en pocas líneas
+python practica/03_softmax_roto.py    # softmax ingenuo con un logit de 120: exp desborda y sale nan
+python practica/03_softmax.py         # LogSumExp: restar el máximo y dar lo mismo que jax.nn.log_softmax
+python practica/04_red.py             # red de dos capas con GELU que separa tres anillos
+python practica/05_weight_decay.py    # 32 incidentes, 28 métricas: overfitting y weight decay medidos en test
+```
+
+### 3. Recorrido guiado por los 5 experimentos (Orden recomendado)
 
 Cada script está diseñado como una lección autocontenida que corre en unos segundos en CPU (el 02 tarda más porque mide el loop eager completo):
 
@@ -145,17 +160,17 @@ python experiments/04_two_layer_mlp_from_scratch.py
 python experiments/05_overfitting_and_weight_decay.py
 ```
 
-### 3. Verificación completa (Linter + Tests + Outside Judge)
+### 4. Verificación completa (Linter + Tests + Outside Judge)
 
 ```bash
 # Ejecutar únicamente el Outside Judge y regenerar benchmarks/latest_results.json
 python verify_ml_principles.py
 
-# Ejecutar ruff, pytest (5 tests) y verify_ml_principles.py en un solo comando
+# Ejecutar ruff, pytest (11 tests) y verify_ml_principles.py en un solo comando
 make all
 ```
 
-### 4. Ejecución on-demand con auto-teardown en Google Cloud (Cloud TPU v5e o NVIDIA L4 GPU)
+### 5. Ejecución on-demand con auto-teardown en Google Cloud (Cloud TPU v5e o NVIDIA L4 GPU)
 
 El script `gcp/run_on_demand_ml.sh` aprovisiona recursos on-demand con auto-teardown en tu propio proyecto de Google Cloud (variable `GCP_PROJECT_ID`) y garantiza la destrucción automática al finalizar mediante `trap cleanup EXIT INT TERM`.
 
