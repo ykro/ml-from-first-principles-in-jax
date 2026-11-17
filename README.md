@@ -128,7 +128,7 @@ pip install -e ".[dev]"
 
 ### 2. Práctica a mano (los fragmentos del video de práctica)
 
-La carpeta `practica/` tiene los fragmentos cortos que se escriben en el video de práctica. `03_softmax_roto.py` imprime un `nan` a propósito: el error es parte del ejercicio. Escríbelos tú antes de abrirlos.
+La carpeta `practica/` tiene los fragmentos cortos que se escriben en el [video de práctica](https://youtu.be/xkrGbsfEOy4). `03_softmax_roto.py` imprime un `nan` a propósito: el error es parte del ejercicio. Escríbelos tú antes de abrirlos.
 
 ```bash
 python practica/01_ajustar.py         # pérdida MSE, value_and_grad y un paso compilado: aprende la fórmula oculta
